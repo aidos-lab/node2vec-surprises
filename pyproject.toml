@@ -5,8 +5,9 @@ description = ""
 authors = ["Bastian Rieck <bastian@rieck.me>"]
 
 [tool.poetry.dependencies]
-python = ">=3.8.1"
+python = ">=3.8.1, <3.11"
 networkx = "^2.6.3"
+numpy = "^1.21.4"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
