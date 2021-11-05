@@ -1,1 +1,1 @@
-# RAWOS: Random Walks on Structures
+# RAWOS: Random Walks On Structures
