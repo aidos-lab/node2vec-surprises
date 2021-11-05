@@ -5,6 +5,10 @@ import collections
 
 import numpy as np
 import networkx as nx
+import pandas as pd
+
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 from rawos.random_walks import random_walk_simple
 
@@ -38,8 +42,25 @@ if __name__ == '__main__':
         degrees = np.asarray(list(dict(G.degree()).values()))
         start_distribution = degrees / np.sum(degrees)
 
-    hitting_times = collections.Counter(list(G.nodes()))
+    hitting_times = collections.Counter(sorted(list(G.nodes())))
 
     for i in range(args.n):
         walk = random_walk_simple(G, args.length, start_distribution)
         hitting_times.update(walk)
+
+    df = pd.DataFrame(list(hitting_times.items()))
+    df = df.rename(
+        columns={
+            0: 'Node',
+            1: 'Visits'
+        }
+    )
+
+    g = sns.barplot(
+        data=df,
+        x='Node', y='Visits'
+    )
+
+    plt.xticks(rotation=90)
+    plt.tight_layout()
+    plt.show()
