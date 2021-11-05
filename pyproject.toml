@@ -8,6 +8,7 @@ authors = ["Bastian Rieck <bastian@rieck.me>"]
 python = ">=3.8.1, <3.11"
 networkx = "^2.6.3"
 numpy = "^1.21.4"
+seaborn = "^0.11.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
