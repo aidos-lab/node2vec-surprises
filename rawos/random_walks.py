@@ -1,6 +1,35 @@
 """Random walk functors on structures."""
 
 import numpy as np
+import networkx as nx
+
+
+def bound_chung(G, k):
+    """Calculate bound provided by Fan Chung in 'Spectral Graph Theory'.
+
+    Parameters
+    ----------
+    G : `nx.Graph`
+        Input graph
+
+    k : int
+        Number of steps of random walk
+
+    Returns
+    -------
+    Upper bound for the distance between *any* initial distribution and
+    the stationary distribution of `P` after `k` steps.
+    """
+    degrees = list(dict(G.degree()).values())
+    d = np.min(degrees)
+    D = np.max(degrees)
+
+    spectrum = sorted(nx.normalized_laplacian_spectrum(G, weight=None))
+    upper = spectrum[-2]
+    lower = spectrum[1]
+
+    lam = lower if 1 - lower >= upper - 1 else 2 - upper
+    return np.exp(-k * lam) * np.sqrt(D / d)
 
 
 def random_walk_simple(G, length, start_distribution):

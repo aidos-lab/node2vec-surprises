@@ -10,6 +10,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+from rawos.random_walks import bound_chung
 from rawos.random_walks import random_walk_simple
 
 
@@ -37,6 +38,11 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     G = nx.generators.social.les_miserables_graph()
+
+    bounds = [bound_chung(G, k) for k in range(10)]
+    sns.lineplot(y=bounds, x=range(10))
+
+    plt.show()
 
     if args.start is None:
         degrees = np.asarray(list(dict(G.degree()).values()))
