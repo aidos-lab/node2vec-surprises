@@ -41,7 +41,14 @@ if __name__ == '__main__':
 
     G = nx.generators.social.les_miserables_graph()
 
-    K = 20
+    if args.start is None:
+        start_distribution = np.ones(G.number_of_nodes())
+        start_distribution /= G.number_of_nodes()
+    else:
+        start_distribution = np.zeros(G.number_of_nodes())
+        start_distribution[args.start] = 1
+
+    K = 50
     bounds = [bound_chung(G, k) for k in range(K)]
     pi = stationary_distribution(G)
     P = transition_matrix(G)
@@ -49,23 +56,17 @@ if __name__ == '__main__':
     g = sns.lineplot(y=bounds, x=range(K))
     g.axhline(np.linalg.norm(pi))
 
-    # TODO: Make this smarter
-    f = np.zeros(G.number_of_nodes())
-    f[0] = 1
+    f = start_distribution
 
     diffs = [f @ np.linalg.matrix_power(P, k) for k in range(K)]
+    diffs = [pi - x for x in diffs]
     diffs = [np.linalg.norm(x) for x in diffs]
 
     g = sns.lineplot(y=diffs, x=range(K))
 
     plt.show()
 
-    if args.start is None:
-        degrees = np.asarray(list(dict(G.degree()).values()))
-        start_distribution = degrees / np.sum(degrees)
-    else:
-        start_distribution = np.zeros(G.number_of_nodes())
-        start_distribution[args.start] = 1
+
 
     hitting_times = collections.Counter(sorted(list(G.nodes())))
 
