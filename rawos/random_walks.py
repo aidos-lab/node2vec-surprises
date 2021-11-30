@@ -12,6 +12,16 @@ def stationary_distribution(G):
     return degrees / (2 * E)
 
 
+def transition_matrix(G):
+    """Return transition matrix of graph."""
+    degrees = np.asarray([d for n, d in G.degree()])
+    D_inv = np.diag(1.0 / degrees)
+
+    return D_inv @ nx.linalg.adjacency_matrix(G, weight=None)
+
+
+
+
 def bound_chung(G, k):
     """Calculate bound provided by Fan Chung in 'Spectral Graph Theory'.
 

@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 from rawos.random_walks import bound_chung
 from rawos.random_walks import stationary_distribution
 from rawos.random_walks import random_walk_simple
+from rawos.random_walks import transition_matrix
 
 
 if __name__ == '__main__':
@@ -40,17 +41,31 @@ if __name__ == '__main__':
 
     G = nx.generators.social.les_miserables_graph()
 
-    bounds = [bound_chung(G, k) for k in range(10)]
+    K = 20
+    bounds = [bound_chung(G, k) for k in range(K)]
     pi = stationary_distribution(G)
+    P = transition_matrix(G)
 
-    g = sns.lineplot(y=bounds, x=range(10))
+    g = sns.lineplot(y=bounds, x=range(K))
     g.axhline(np.linalg.norm(pi))
+
+    # TODO: Make this smarter
+    f = np.zeros(G.number_of_nodes())
+    f[0] = 1
+
+    diffs = [f @ np.linalg.matrix_power(P, k) for k in range(K)]
+    diffs = [np.linalg.norm(x) for x in diffs]
+
+    g = sns.lineplot(y=diffs, x=range(K))
 
     plt.show()
 
     if args.start is None:
         degrees = np.asarray(list(dict(G.degree()).values()))
         start_distribution = degrees / np.sum(degrees)
+    else:
+        start_distribution = np.zeros(G.number_of_nodes())
+        start_distribution[args.start] = 1
 
     hitting_times = collections.Counter(sorted(list(G.nodes())))
 
