@@ -4,6 +4,14 @@ import numpy as np
 import networkx as nx
 
 
+def stationary_distribution(G):
+    """Return stationary distribution for graph."""
+    E = G.number_of_edges()
+    degrees = np.asarray([d for n, d in G.degree()])
+
+    return degrees / (2 * E)
+
+
 def bound_chung(G, k):
     """Calculate bound provided by Fan Chung in 'Spectral Graph Theory'.
 

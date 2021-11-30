@@ -11,6 +11,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 from rawos.random_walks import bound_chung
+from rawos.random_walks import stationary_distribution
 from rawos.random_walks import random_walk_simple
 
 
@@ -40,7 +41,10 @@ if __name__ == '__main__':
     G = nx.generators.social.les_miserables_graph()
 
     bounds = [bound_chung(G, k) for k in range(10)]
-    sns.lineplot(y=bounds, x=range(10))
+    pi = stationary_distribution(G)
+
+    g = sns.lineplot(y=bounds, x=range(10))
+    g.axhline(np.linalg.norm(pi))
 
     plt.show()
 
