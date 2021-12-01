@@ -22,6 +22,7 @@ def print_spectrum(A, name=None):
         print(name)
 
     if (A == A.T).all():
+        print('symmetric')
         spec = np.linalg.eigvalsh(A)
     else:
         spec = np.linalg.eigvals(A)
@@ -75,14 +76,20 @@ if __name__ == '__main__':
     A = nx.linalg.adjacency_matrix(G, weight=None).todense()
     degrees = np.asarray([d for n, d in G.degree()])
     D_inv = np.diag(1.0 / degrees)
+    D = np.diag(degrees)
 
     print_spectrum(A, 'A')
-    print_spectrum(D_inv, 'D_inv')
-    print_spectrum(A @ A.T, 'A @ A.T')
+    spec_1 = print_spectrum(D_inv, 'D_inv')
+    spec_2 = print_spectrum(A @ A.T, 'A @ A.T')
 
-    Pt = np.linalg.matrix_power(P, 1)
+    Pt = P # np.linalg.matrix_power(P, 1)
 
-    print_spectrum(Pt @ Pt.T, 'Pt @ Pt.T')
+    spec_3 = print_spectrum(Pt @ Pt.T, 'Pt @ Pt.T')
+
+    print(np.linalg.matrix_power(np.sqrt(D) @ P @ np.sqrt(D_inv), 2))
+
+    print(sorted(spec_1, reverse=True) * spec_2 * sorted(spec_1,
+        reverse=True))
 
     raise 'heck'
 
