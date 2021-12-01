@@ -20,8 +20,6 @@ def transition_matrix(G):
     return D_inv @ nx.linalg.adjacency_matrix(G, weight=None)
 
 
-
-
 def bound_chung(G, k):
     """Calculate bound provided by Fan Chung in 'Spectral Graph Theory'.
 
