@@ -16,6 +16,22 @@ from rawos.random_walks import random_walk_simple
 from rawos.random_walks import transition_matrix
 
 
+def print_spectrum(A, name=None):
+    """Print spectrum of matrix."""
+    if name:
+        print(name)
+
+    if (A == A.T).all():
+        spec = np.linalg.eigvalsh(A)
+    else:
+        spec = np.linalg.eigvals(A)
+
+    print(spec)
+    print('\n')
+
+    return spec
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -52,6 +68,23 @@ if __name__ == '__main__':
     bounds = [bound_chung(G, k) for k in range(K)]
     pi = stationary_distribution(G)
     P = transition_matrix(G)
+
+    # HIC SVNT LEONES
+    #
+    # TODO: formalise this somewhere...
+    A = nx.linalg.adjacency_matrix(G, weight=None).todense()
+    degrees = np.asarray([d for n, d in G.degree()])
+    D_inv = np.diag(1.0 / degrees)
+
+    print_spectrum(A, 'A')
+    print_spectrum(D_inv, 'D_inv')
+    print_spectrum(A @ A.T, 'A @ A.T')
+
+    Pt = np.linalg.matrix_power(P, 1)
+
+    print_spectrum(Pt @ Pt.T, 'Pt @ Pt.T')
+
+    raise 'heck'
 
     g = sns.lineplot(y=bounds, x=range(K))
     g.axhline(np.linalg.norm(pi))
