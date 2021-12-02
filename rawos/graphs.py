@@ -42,24 +42,23 @@ def bound(f, G, K=10):
 
     A = nx.linalg.adjacency_matrix(G, weight=None).todense()
     D = np.diag(degrees)
-    L = D - A
     I = np.eye(G.number_of_nodes())
-
     D_inv = np.diag(1.0 / degrees)
+    L = D - A
 
     from scipy.linalg import expm
 
     for k in range(K):
         difference = (f - pi) @ np.linalg.matrix_power((I - D_inv @ L), k)
-        print(np.linalg.norm(difference))
+        #print(np.linalg.norm(difference, 2))
 
-        M2 = np.exp(-k * D_inv @ L)
-        M1 = np.linalg.matrix_power(I - D_inv @ L, k)
+        spectrum = sorted(np.linalg.eigvalsh(L))
+        second = spectrum[1]
 
-        print(np.linalg.norm(M2) - np.linalg.norm(M1))
+        upper_bound = np.linalg.norm(f - pi, 2)**2
+        upper_bound *= np.exp(-2 * second * k)
 
-        # upper_bound = np.linalg.norm(f - pi, 2)
-        # print(upper_bound)
+        print(upper_bound, np.linalg.norm(difference, 2)**2 - upper_bound)
 
 
 if __name__ == '__main__':
