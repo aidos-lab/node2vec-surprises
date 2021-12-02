@@ -16,7 +16,7 @@ from rawos.random_walks import random_walk_simple
 from rawos.random_walks import transition_matrix
 
 
-def print_spectrum(A, name=None):
+def print_spectrum(A, name=None, sort=False):
     """Print spectrum of matrix."""
     if name:
         print(name)
@@ -27,38 +27,13 @@ def print_spectrum(A, name=None):
     else:
         spec = np.linalg.eigvals(A)
 
+    if sort:
+        spec = sorted(spec)
+
     print(spec)
     print('\n')
 
     return spec
-
-
-def bound(f, G, K=10):
-    """Experiment with bound formulations."""
-    degrees = np.asarray([d for n, d in G.degree()])
-
-    pi = stationary_distribution(G)
-    P = transition_matrix(G)
-
-    A = nx.linalg.adjacency_matrix(G, weight=None).todense()
-    D = np.diag(degrees)
-    I = np.eye(G.number_of_nodes())
-    D_inv = np.diag(1.0 / degrees)
-    L = D - A
-
-    from scipy.linalg import expm
-
-    for k in range(K):
-        difference = (f - pi) @ np.linalg.matrix_power((I - D_inv @ L), k)
-        #print(np.linalg.norm(difference, 2))
-
-        spectrum = sorted(np.linalg.eigvalsh(L))
-        second = spectrum[1]
-
-        upper_bound = np.linalg.norm(f - pi, 2)**2
-        upper_bound *= np.exp(-2 * second * k)
-
-        print(upper_bound, np.linalg.norm(difference, 2)**2 - upper_bound)
 
 
 if __name__ == '__main__':
