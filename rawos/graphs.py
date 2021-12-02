@@ -43,12 +43,13 @@ def bound(f, G, K=10):
     A = nx.linalg.adjacency_matrix(G, weight=None).todense()
     D = np.diag(degrees)
     L = D - A
+    I = np.eye(G.number_of_nodes())
 
     D_inv = np.diag(1.0 / degrees)
 
     for k in range(K):
-        difference = (f - pi) @ np.linalg.matrix_power(P, k)
-        print(difference)
+        difference = (f - pi) @ np.linalg.matrix_power((I - D_inv @ L), k)
+        print(np.linalg.norm(difference))
 
 
 if __name__ == '__main__':
