@@ -68,36 +68,10 @@ if __name__ == '__main__':
         start_distribution = np.zeros(G.number_of_nodes())
         start_distribution[args.start] = 1
 
-    bound(start_distribution, G)
-    raise 'heck'
-
     K = 50
     bounds = [bound_chung(G, k) for k in range(K)]
     pi = stationary_distribution(G)
     P = transition_matrix(G)
-
-    # HIC SVNT LEONES
-    #
-    # TODO: formalise this somewhere...
-    A = nx.linalg.adjacency_matrix(G, weight=None).todense()
-    degrees = np.asarray([d for n, d in G.degree()])
-    D_inv = np.diag(1.0 / degrees)
-    D = np.diag(degrees)
-
-    print_spectrum(A, 'A')
-    spec_1 = print_spectrum(D_inv, 'D_inv')
-    spec_2 = print_spectrum(A @ A.T, 'A @ A.T')
-
-    Pt = P # np.linalg.matrix_power(P, 1)
-
-    spec_3 = print_spectrum(Pt @ Pt.T, 'Pt @ Pt.T')
-
-    print(np.linalg.matrix_power(np.sqrt(D) @ P @ np.sqrt(D_inv), 2))
-
-    print(sorted(spec_1, reverse=True) * spec_2 * sorted(spec_1,
-        reverse=True))
-
-    raise 'heck'
 
     g = sns.lineplot(y=bounds, x=range(K))
     g.axhline(np.linalg.norm(pi))
@@ -111,8 +85,6 @@ if __name__ == '__main__':
     g = sns.lineplot(y=diffs, x=range(K))
 
     plt.show()
-
-
 
     hitting_times = collections.Counter(sorted(list(G.nodes())))
 
