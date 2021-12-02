@@ -33,6 +33,24 @@ def print_spectrum(A, name=None):
     return spec
 
 
+def bound(f, G, K=10):
+    """Experiment with bound formulations."""
+    degrees = np.asarray([d for n, d in G.degree()])
+
+    pi = stationary_distribution(G)
+    P = transition_matrix(G)
+
+    A = nx.linalg.adjacency_matrix(G, weight=None).todense()
+    D = np.diag(degrees)
+    L = D - A
+
+    D_inv = np.diag(1.0 / degrees)
+
+    for k in range(K):
+        difference = (f - pi) @ np.linalg.matrix_power(P, k)
+        print(difference)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -64,6 +82,9 @@ if __name__ == '__main__':
     else:
         start_distribution = np.zeros(G.number_of_nodes())
         start_distribution[args.start] = 1
+
+    bound(start_distribution, G)
+    raise 'heck'
 
     K = 50
     bounds = [bound_chung(G, k) for k in range(K)]
