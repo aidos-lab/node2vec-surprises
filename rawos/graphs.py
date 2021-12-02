@@ -47,9 +47,19 @@ def bound(f, G, K=10):
 
     D_inv = np.diag(1.0 / degrees)
 
+    from scipy.linalg import expm
+
     for k in range(K):
         difference = (f - pi) @ np.linalg.matrix_power((I - D_inv @ L), k)
         print(np.linalg.norm(difference))
+
+        M2 = np.exp(-k * D_inv @ L)
+        M1 = np.linalg.matrix_power(I - D_inv @ L, k)
+
+        print(np.linalg.norm(M2) - np.linalg.norm(M1))
+
+        # upper_bound = np.linalg.norm(f - pi, 2)
+        # print(upper_bound)
 
 
 if __name__ == '__main__':

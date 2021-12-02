@@ -41,7 +41,7 @@ def bound_chung(G, k):
     D = np.max(degrees)
 
     spectrum = sorted(nx.normalized_laplacian_spectrum(G, weight=None))
-    upper = spectrum[-2]
+    upper = spectrum[-1]
     lower = spectrum[1]
 
     lam = lower if 1 - lower >= upper - 1 else 2 - upper
