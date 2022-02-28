@@ -2,6 +2,6 @@
 
 Running the code (example):
 
-    # You can also adjust the length of the walk and the number
-    # of different walks. These are the defaults:
-    python -m rawos.graphs -l 3 -n 100
+    # Let's run for 50 epochs, generate 16-dimensional embeddings,
+    # and keep everything at default parameters.
+    $ python node2vec.py -d 16 -e 50
