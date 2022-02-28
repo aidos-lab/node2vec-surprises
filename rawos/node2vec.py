@@ -44,7 +44,7 @@ def main(args):
         z = model()
         return z, torch.linalg.vector_norm(z)
 
-    for epoch in range(1, 50):
+    for epoch in range(args.epochs):
         loss = train()
         z, norm = test()
 
@@ -62,7 +62,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-c', '--context', type=int, default=5)
-    parser.add_argument('-d', '--dimension', type=int, default=32)
+    parser.add_argument('-d', '--dimension', type=int, default=16)
+    parser.add_argument('-e', '--epochs', type=int, default=100)
     parser.add_argument('-l', '--length', type=int, default=10)
     parser.add_argument('-n', '--num-walks', type=int, default=10)
 
