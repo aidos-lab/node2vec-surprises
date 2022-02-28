@@ -57,7 +57,7 @@ def main(args):
     filename += f'-l{args.length}'
     filename += f'-n{args.num_walks}'
     filename += f'-{str(uuid.uuid4().hex)}'
-    filename += '.csv'
+    filename += '.tsv'
 
     np.savetxt(
         filename,
