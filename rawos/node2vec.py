@@ -3,6 +3,7 @@
 import argparse
 
 import torch
+import uuid
 
 import numpy as np
 
@@ -50,8 +51,16 @@ def main(args):
 
         print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}, Norm: {norm:.4f}')
 
+    filename = 'er'
+    filename += f'-c{args.context}'
+    filename += f'-d{args.dimension}'
+    filename += f'-l{args.length}'
+    filename += f'-n{args.num_walks}'
+    filename += f'-{str(uuid.uuid4().hex)}'
+    filename += '.csv'
+
     np.savetxt(
-        'embedding.csv',
+        filename,
         z.detach().cpu().numpy(),
         delimiter='\t',
         fmt='%.4f'
