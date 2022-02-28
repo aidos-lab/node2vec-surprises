@@ -6,24 +6,24 @@ import os.path as osp
 
 import matplotlib.pyplot as plt
 import torch
-from sklearn.manifold import TSNE
+
+from sklearn.decomposition import PCA
 
 from torch_geometric.datasets import Planetoid
 from torch_geometric.nn import Node2Vec
+from torch_geometric.utils import erdos_renyi_graph
 
 
 def main(args):
-    dataset = 'Cora'
-    path = osp.join(osp.dirname(osp.realpath(__file__)), '..', 'data', dataset)
-    dataset = Planetoid(path)
-    data = dataset[0]
+    num_nodes = 200
+    edge_index = erdos_renyi_graph(num_nodes, 0.25)
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    model = Node2Vec(data.edge_index, embedding_dim=128, walk_length=20,
-                     context_size=10, walks_per_node=10,
+    model = Node2Vec(edge_index, embedding_dim=32, walk_length=10,
+                     context_size=5, walks_per_node=10,
                      num_negative_samples=1, p=1, q=1, sparse=True).to(device)
 
-    loader = model.loader(batch_size=128, shuffle=True, num_workers=4)
+    loader = model.loader(batch_size=64, shuffle=True, num_workers=4)
     optimizer = torch.optim.SparseAdam(list(model.parameters()), lr=0.01)
 
     def train():
@@ -41,34 +41,25 @@ def main(args):
     def test():
         model.eval()
         z = model()
-        acc = model.test(z[data.train_mask], data.y[data.train_mask],
-                         z[data.test_mask], data.y[data.test_mask],
-                         max_iter=150)
-        return acc
+        return torch.linalg.vector_norm(z)
 
-    for epoch in range(1, 101):
+    for epoch in range(1, 50):
         loss = train()
-        acc = test()
-        print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}, Acc: {acc:.4f}')
+        norm = test()
+        print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}, Norm: {norm:.4f}')
 
     @torch.no_grad()
-    def plot_points(colors):
+    def plot_points():
         model.eval()
-        z = model(torch.arange(data.num_nodes, device=device))
-        z = TSNE(n_components=2).fit_transform(z.cpu().numpy())
-        y = data.y.cpu().numpy()
+        z = model(torch.arange(num_nodes, device=device))
+        z = PCA(n_components=2).fit_transform(z.cpu().numpy())
 
         plt.figure(figsize=(8, 8))
-        for i in range(dataset.num_classes):
-            plt.scatter(z[y == i, 0], z[y == i, 1], s=20, color=colors[i])
+        plt.scatter(z[:, 0], z[:, 1], s=20)
         plt.axis('off')
         plt.show()
 
-    colors = [
-        '#ffc0cb', '#bada55', '#008080', '#420420', '#7fe5f0', '#065535',
-        '#ffd700'
-    ]
-    plot_points(colors)
+    plot_points()
 
 
 if __name__ == "__main__":
