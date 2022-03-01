@@ -71,15 +71,22 @@ def main(args):
         n_gpus = 0
 
     model = node2vec(args)
+
     train_loader = model.model.loader(
         batch_size=args.num_nodes,
         shuffle=True,
         num_workers=4
     )
 
+    early_stopping = pl.callbacks.EarlyStopping(
+        monitor='train_loss',
+        patience=10,
+    )
+
     trainer = pl.Trainer(
         max_epochs=args.epochs,
         gpus=n_gpus,
+        callbacks=early_stopping,
     )
     trainer.fit(model, train_loader)
 
