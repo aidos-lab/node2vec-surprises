@@ -83,9 +83,12 @@ def main(args):
         patience=10,
     )
 
+    # FIXME: Currently, we are never using the GPU because the detection
+    # routine is not sufficiently smart to detect cases where we have
+    # CUDA but not available GPU. 
     trainer = pl.Trainer(
         max_epochs=args.epochs,
-        gpus=n_gpus,
+        gpus=0,
         callbacks=early_stopping,
     )
     trainer.fit(model, train_loader)
