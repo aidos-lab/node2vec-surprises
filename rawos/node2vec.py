@@ -7,49 +7,84 @@ import uuid
 
 import numpy as np
 
+import pytorch_lightning as pl
+
 from torch_geometric.nn import Node2Vec
 from torch_geometric.utils import erdos_renyi_graph
 
 
+class node2vec(pl.LightningModule):
+    """`node2vec` module."""
+
+    def __init__(self, args):
+        """Create new `node2vec` module.
+
+        Parameters
+        ----------
+        args
+            Command-line arguments, parsed using `argparse`.
+        """
+        super().__init__()
+
+        edge_index = erdos_renyi_graph(
+            args.num_nodes,
+            args.edge_prob
+        )
+
+        self.model = Node2Vec(
+            edge_index,
+            embedding_dim=args.dimension,
+            walk_length=args.length,
+            context_size=args.context,
+            walks_per_node=args.num_walks,
+            num_negative_samples=1,
+            p=1,
+            q=1,
+            sparse=True
+        )
+
+    def configure_optimizers(self):
+        opt = torch.optim.SparseAdam(self.model.parameters(), lr=1e-2)
+        return opt
+
+    def forward(self, x):
+        embedding = self.model(x)
+
+    def training_step(self, train_batch, batch_idx):
+        pos_rw, neg_rw = train_batch
+        loss = self.model.loss(pos_rw, neg_rw)
+
+        self.log('train_loss', loss)
+        return loss
+
+    def get_embedding(self):
+        embedding = self.model()
+        return embedding.detach().numpy()
+
+
 def main(args):
-    num_nodes = 200
-    edge_index = erdos_renyi_graph(num_nodes, 0.25)
-
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    model = Node2Vec(
-        edge_index,
-        embedding_dim=args.dimension,
-        walk_length=args.length,
-        context_size=args.context,
-        walks_per_node=args.num_walks,
-        num_negative_samples=1, p=1, q=1,
-        sparse=True).to(device)
 
-    loader = model.loader(batch_size=64, shuffle=True, num_workers=4)
-    optimizer = torch.optim.SparseAdam(list(model.parameters()), lr=0.01)
+    if device == 'cuda':
+        n_gpus = 1
+    else:
+        n_gpus = 0
 
-    def train():
-        model.train()
-        total_loss = 0
-        for pos_rw, neg_rw in loader:
-            optimizer.zero_grad()
-            loss = model.loss(pos_rw.to(device), neg_rw.to(device))
-            loss.backward()
-            optimizer.step()
-            total_loss += loss.item()
-        return total_loss / len(loader)
+    model = node2vec(args)
+    train_loader = model.model.loader(
+        batch_size=args.num_nodes,
+        shuffle=True,
+        num_workers=4
+    )
 
-    @torch.no_grad()
-    def test():
-        model.eval()
-        z = model()
-        return z, torch.linalg.vector_norm(z)
+    trainer = pl.Trainer(
+        max_epochs=args.epochs,
+        gpus=n_gpus,
+    )
+    trainer.fit(model, train_loader)
 
-    for epoch in range(args.epochs):
-        loss = train()
-        z, norm = test()
-
-        print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}, Norm: {norm:.4f}')
+    model.eval()
+    z = model.get_embedding()
 
     filename = 'er'
     filename += f'-c{args.context}'
@@ -61,7 +96,7 @@ def main(args):
 
     np.savetxt(
         filename,
-        z.detach().cpu().numpy(),
+        z,
         delimiter='\t',
         fmt='%.4f'
     )
@@ -75,6 +110,10 @@ if __name__ == "__main__":
     parser.add_argument('-e', '--epochs', type=int, default=100)
     parser.add_argument('-l', '--length', type=int, default=10)
     parser.add_argument('-n', '--num-walks', type=int, default=10)
+
+    # For ER graphs
+    parser.add_argument('--num-nodes', type=int, default=200)
+    parser.add_argument('--edge-prob', type=float, default=0.25)
 
     args = parser.parse_args()
 
