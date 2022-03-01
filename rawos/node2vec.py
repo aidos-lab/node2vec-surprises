@@ -98,6 +98,7 @@ def main(args):
     filename += f'-d{args.dimension}'
     filename += f'-l{args.length}'
     filename += f'-n{args.num_walks}'
+    filename += f'-p{args.edge_prob:.2f}'.replace('.', '_')
     filename += f'-{str(uuid.uuid4().hex)}'
     filename += '.tsv'
 
@@ -118,10 +119,13 @@ if __name__ == "__main__":
     parser.add_argument('-l', '--length', type=int, default=10)
     parser.add_argument('-n', '--num-walks', type=int, default=10)
 
+    parser.add_argument('-N', '--num-runs', type=int, default=10)
+
     # For ER graphs
     parser.add_argument('--num-nodes', type=int, default=200)
     parser.add_argument('--edge-prob', type=float, default=0.25)
 
     args = parser.parse_args()
 
-    main(args)
+    for i in range(args.num_runs):
+        main(args)
