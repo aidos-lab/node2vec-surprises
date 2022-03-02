@@ -26,3 +26,15 @@ def hausdorff_distance(X, Y, metric='euclidean'):
     d_YX = np.max(np.min(distances, axis=0))
 
     return max(d_XY, d_YX)
+
+
+def pairwise_function(X, fn):
+    """Pairwise scale value calculation with an arbitrary function."""
+    n = len(X)
+    D = np.empty((n, n), dtype=float)
+
+    for i, x in enumerate(X):
+        for j, y in enumerate(X):
+            D[i, j] = fn(x, y)
+
+    return D
