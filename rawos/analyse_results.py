@@ -1,6 +1,7 @@
 """Main analysis script."""
 
 import argparse
+import json
 import os
 
 import numpy as np
@@ -97,8 +98,7 @@ def assign_groups(experiments):
     for e, p in zip(experiments, parameters):
         e['group'] = unique_parameters[p]
 
-    print(unique_parameters)
-
+    print(json.dumps(unique_parameters, indent=2))
     return experiments, len(unique_parameters)
 
 
@@ -143,7 +143,6 @@ if __name__ == '__main__':
     df = pd.concat(df)
     df = df.astype({'group': 'int32'})
 
-    print(df)
     sns.boxplot(data=df, x=df['group'], y='distances')
 
     plt.show()
