@@ -1,10 +1,10 @@
 """Main analysis script."""
 
 import argparse
-import glob
 import os
 
 import numpy as np
+import pandas as pd
 
 from metrics import diameter
 from metrics import hausdorff_distance
@@ -80,11 +80,10 @@ def get_variable_parameters(experiment):
     ]
 
     return parameters
-    
+
 
 def assign_groups(experiments):
     """Assigns (arbitrary) groups to experiments based on parameters."""
-
     parameters = list(map(get_variable_parameters, experiments))
     parameters = [
         ', '.join(p) for p in parameters
@@ -92,13 +91,15 @@ def assign_groups(experiments):
 
     unique_parameters = set(parameters)
     unique_parameters = dict({
-            p: i for i, p in enumerate(unique_parameters)
+            p: i for i, p in enumerate(sorted(unique_parameters))
             })
 
     for e, p in zip(experiments, parameters):
         e['group'] = unique_parameters[p]
 
-    return experiments
+    print(unique_parameters)
+
+    return experiments, len(unique_parameters)
 
 
 if __name__ == '__main__':
@@ -109,10 +110,30 @@ if __name__ == '__main__':
 
     filenames = args.FILE
     experiments = [parse_filename(name) for name in filenames]
-    experiments = assign_groups(experiments)
+    experiments, n_groups = assign_groups(experiments)
 
-    H = pairwise_function(experiments, fn=hausdorff_distance, key='data')
-    print(H)
+    # Data frame with stats; will be visualised later on.
+    df = []
 
-    sns.heatmap(H)
+    for group in range(n_groups):
+        experiments_group = [e for e in experiments if e['group'] == group]
+        distances_in_group = pairwise_function(
+            experiments_group, fn=hausdorff_distance, key='data'
+        )
+
+        distances_in_group = distances_in_group.ravel()
+        distances_in_group = distances_in_group[distances_in_group > 0.0]
+
+        df.append(pd.DataFrame.from_dict({
+            'distances': distances_in_group.tolist(),
+            'group': group,
+            })
+        )
+
+    df = pd.concat(df)
+    df = df.astype({'group': 'int32'})
+
+    print(df)
+    sns.boxplot(data=df, x=df['group'], y='distances')
+
     plt.show()
