@@ -119,7 +119,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--hue',
         type=str,
-        default='group',
+        default=None,
         help='Attribute by which to colour results.'
     )
 
@@ -164,6 +164,7 @@ if __name__ == '__main__':
     df = pd.concat(df)
     df = df.astype({'group': 'int32'})
 
-    sns.violinplot(data=df, x=df['group'], y='distances', hue=args.hue)
+    sns.boxplot(data=df, x=df['group'], y='distances', hue=args.hue)
 
+    plt.tight_layout()
     plt.show()
