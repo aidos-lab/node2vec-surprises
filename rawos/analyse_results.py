@@ -68,6 +68,39 @@ def dist_parameters(exp1, exp2):
     return dist
 
 
+def get_variable_parameters(experiment):
+    """Return array of all variable parameters."""
+    ignored = [
+        'filename',
+        'data',
+    ]
+
+    parameters = [
+        f'{k} = {v}' for k, v in experiment.items() if k not in ignored
+    ]
+
+    return parameters
+    
+
+def assign_groups(experiments):
+    """Assigns (arbitrary) groups to experiments based on parameters."""
+
+    parameters = list(map(get_variable_parameters, experiments))
+    parameters = [
+        ', '.join(p) for p in parameters
+    ]
+
+    unique_parameters = set(parameters)
+    unique_parameters = dict({
+            p: i for i, p in enumerate(unique_parameters)
+            })
+
+    for e, p in zip(experiments, parameters):
+        e['group'] = unique_parameters[p]
+
+    return experiments
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('FILE', type=str, help='Input file(s)', nargs='+')
@@ -76,6 +109,7 @@ if __name__ == '__main__':
 
     filenames = args.FILE
     experiments = [parse_filename(name) for name in filenames]
+    experiments = assign_groups(experiments)
 
     H = pairwise_function(experiments, fn=hausdorff_distance, key='data')
     print(H)
