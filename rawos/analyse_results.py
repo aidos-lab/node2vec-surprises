@@ -83,16 +83,16 @@ def get_variable_parameters(experiment):
 
 
 def assign_groups(experiments):
-    """Assigns (arbitrary) groups to experiments based on parameters."""
+    """Assign (arbitrary) groups to experiments based on parameters."""
     parameters = list(map(get_variable_parameters, experiments))
     parameters = [
         ', '.join(p) for p in parameters
     ]
 
-    unique_parameters = set(parameters)
+    unique_parameters = dict.fromkeys(parameters)
     unique_parameters = dict({
-            p: i for i, p in enumerate(sorted(unique_parameters))
-            })
+            p: i for i, p in enumerate(unique_parameters)
+    })
 
     for e, p in zip(experiments, parameters):
         e['group'] = unique_parameters[p]
@@ -110,6 +110,16 @@ if __name__ == '__main__':
 
     filenames = args.FILE
     experiments = [parse_filename(name) for name in filenames]
+
+    experiments = sorted(
+        experiments,
+        key=lambda x: (
+            x['dimension'],
+            x['length'],
+            x['n_walks'],
+            x['context'])
+    )
+
     experiments, n_groups = assign_groups(experiments)
 
     # Data frame with stats; will be visualised later on.
