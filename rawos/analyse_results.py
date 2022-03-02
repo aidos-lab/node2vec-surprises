@@ -40,6 +40,19 @@ def parse_filename(filename):
     return experiment
 
 
+def dist_parameters(exp1, exp2):
+    """Distance between parameter sets."""
+    dist = 0
+    for (k1, v1), (k2, v2) in zip(exp1.items(), exp2.items()):
+        assert k1 == k2
+        if k1 == 'filename':
+            continue
+        else:
+            dist += (v1 != v2)
+
+    return dist
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('DIRECTORY', type=str, help='Input directory')
@@ -48,3 +61,7 @@ if __name__ == '__main__':
 
     filenames = glob.glob(os.path.join(args.DIRECTORY, '*.tsv'))
     experiments = [parse_filename(name) for name in filenames]
+
+    for exp1 in experiments:
+        for exp2 in experiments:
+            print(dist_parameters(exp1, exp2))
