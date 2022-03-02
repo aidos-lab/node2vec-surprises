@@ -164,7 +164,12 @@ if __name__ == '__main__':
     df = pd.concat(df)
     df = df.astype({'group': 'int32'})
 
-    sns.boxplot(data=df, x=df['group'], y='distances', hue=args.hue)
+    sns.boxplot(
+        data=df,
+        x=df['group'], y='distances',
+        hue=args.hue,
+        dodge=False
+    )
 
     plt.tight_layout()
     plt.show()
