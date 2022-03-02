@@ -10,8 +10,11 @@ from metrics import diameter
 from metrics import hausdorff_distance
 from metrics import pairwise_function
 
+import seaborn as sns
+import matplotlib.pyplot as plt
 
-def parse_filename(filename):
+
+def parse_filename(filename, normalise=True):
     """Parse filename into experiment description."""
     basename = os.path.basename(filename)
     basename = os.path.splitext(basename)[0]
@@ -44,6 +47,11 @@ def parse_filename(filename):
 
     experiment['filename'] = filename
     experiment['data'] = np.loadtxt(filename, delimiter='\t')
+
+    if normalise:
+        diam = diameter(experiment['data'])
+        experiment['data'] /= diam
+
     return experiment
 
 
@@ -62,12 +70,15 @@ def dist_parameters(exp1, exp2):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('DIRECTORY', type=str, help='Input directory')
+    parser.add_argument('FILE', type=str, help='Input file(s)', nargs='+')
 
     args = parser.parse_args()
 
-    filenames = glob.glob(os.path.join(args.DIRECTORY, '*.tsv'))
+    filenames = args.FILE
     experiments = [parse_filename(name) for name in filenames]
 
     H = pairwise_function(experiments, fn=hausdorff_distance, key='data')
     print(H)
+
+    sns.heatmap(H)
+    plt.show()
