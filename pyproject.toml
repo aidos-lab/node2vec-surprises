@@ -16,6 +16,7 @@ torch-cluster = "^1.5.9"
 torch-spline-conv = "^1.2.1"
 torch-geometric = "^2.0.3"
 pytorch-lightning = "^1.5.10"
+scikit-learn = "^1.0.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
