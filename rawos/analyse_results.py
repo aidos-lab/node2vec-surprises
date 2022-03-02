@@ -35,6 +35,10 @@ def parse_filename(filename, normalise=True):
         name = token[0]
         value = token[1:]
 
+        # By default, the graph is modified instead of kept when
+        # repeating the experiment.
+        experiment['keep'] = False
+
         if name == 'c':
             experiment['context'] = int(value)
         elif name == 'd':
@@ -45,6 +49,8 @@ def parse_filename(filename, normalise=True):
             experiment['n_walks'] = int(value)
         elif name == 'p':
             experiment['edge_probability'] = float(value.replace('_', '.'))
+        elif token == 'keep':
+            experiment['keep'] = True
 
     experiment['filename'] = filename
     experiment['data'] = np.loadtxt(filename, delimiter='\t')
