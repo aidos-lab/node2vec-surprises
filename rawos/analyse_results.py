@@ -4,6 +4,12 @@ import argparse
 import glob
 import os
 
+import numpy as np
+
+from metrics import diameter
+from metrics import hausdorff_distance
+from metrics import pairwise_function
+
 
 def parse_filename(filename):
     """Parse filename into experiment description."""
@@ -37,6 +43,7 @@ def parse_filename(filename):
             experiment['edge_probability'] = float(value.replace('_', '.'))
 
     experiment['filename'] = filename
+    experiment['data'] = np.loadtxt(filename, delimiter='\t')
     return experiment
 
 
@@ -62,6 +69,5 @@ if __name__ == '__main__':
     filenames = glob.glob(os.path.join(args.DIRECTORY, '*.tsv'))
     experiments = [parse_filename(name) for name in filenames]
 
-    for exp1 in experiments:
-        for exp2 in experiments:
-            print(dist_parameters(exp1, exp2))
+    H = pairwise_function(experiments, fn=hausdorff_distance, key='data')
+    print(H)

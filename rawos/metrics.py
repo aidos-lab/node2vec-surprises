@@ -20,6 +20,10 @@ def hausdorff_distance(X, Y, metric='euclidean'):
     X = np.asarray(X)
     Y = np.asarray(Y)
 
+    # Check whether dimensions are compatible.
+    if X.shape[1] != Y.shape[1]:
+        return np.nan
+
     distances = pairwise_distances(X=X, Y=Y)
 
     d_XY = np.max(np.min(distances, axis=1))
@@ -28,7 +32,7 @@ def hausdorff_distance(X, Y, metric='euclidean'):
     return max(d_XY, d_YX)
 
 
-def pairwise_function(X, fn, Y=None):
+def pairwise_function(X, fn, Y=None, key=None):
     """Pairwise scalar value calculation with an arbitrary function."""
     n = len(X)
     m = len(X) if Y is None else len(Y)
@@ -39,6 +43,9 @@ def pairwise_function(X, fn, Y=None):
 
     for i, x in enumerate(X):
         for j, y in enumerate(Y):
-            D[i, j] = fn(x, y)
+            if key is None:
+                D[i, j] = fn(x, y)
+            else:
+                D[i, j] = fn(x[key], y[key])
 
     return D
