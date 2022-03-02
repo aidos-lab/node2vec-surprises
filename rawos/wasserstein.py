@@ -34,7 +34,7 @@ def main(args):
 	filename += '-n'+ str(n)
 
 	## get filenames according to filter
-	path = '../rawos'
+	path = '../results'
 	files = []
 	for i in os.listdir(path):
 	    if os.path.isfile(os.path.join(path,i)) and filename in i:
@@ -64,11 +64,11 @@ def main(args):
 	    plt.imshow(Dist[:,:,i])
 	    plt.colorbar()
 	    plt.title('Wasserstein distance in dimension {}'.format(i))
-	    plt.savefig('blabla{}'.format(i))
+	    plt.savefig('../Wasserstein_distance/figures/Distance_matrix_dim{}'.format(i))
 	    #plt.show()
 
 	for i in range(max_dim+1):
-	    dist_filename = filename + '_Wasserstein_dim' + str(i) +'.tsv'
+	    dist_filename = '../Wasserstein_distance/matrice/'+filename + '_Wasserstein_dim' + str(i) +'.tsv'
 
 	    np.savetxt(
 	            dist_filename,
