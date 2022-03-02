@@ -1,10 +1,11 @@
 """Main analysis script."""
 
 import argparse
-import glob
+import json
 import os
 
 import numpy as np
+import pandas as pd
 
 from metrics import diameter
 from metrics import hausdorff_distance
@@ -68,6 +69,39 @@ def dist_parameters(exp1, exp2):
     return dist
 
 
+def get_variable_parameters(experiment):
+    """Return array of all variable parameters."""
+    ignored = [
+        'filename',
+        'data',
+    ]
+
+    parameters = [
+        f'{k} = {v}' for k, v in experiment.items() if k not in ignored
+    ]
+
+    return parameters
+
+
+def assign_groups(experiments):
+    """Assign (arbitrary) groups to experiments based on parameters."""
+    parameters = list(map(get_variable_parameters, experiments))
+    parameters = [
+        ', '.join(p) for p in parameters
+    ]
+
+    unique_parameters = dict.fromkeys(parameters)
+    unique_parameters = dict({
+            p: i for i, p in enumerate(unique_parameters)
+    })
+
+    for e, p in zip(experiments, parameters):
+        e['group'] = unique_parameters[p]
+
+    print(json.dumps(unique_parameters, indent=2))
+    return experiments, len(unique_parameters)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('FILE', type=str, help='Input file(s)', nargs='+')
@@ -77,8 +111,38 @@ if __name__ == '__main__':
     filenames = args.FILE
     experiments = [parse_filename(name) for name in filenames]
 
-    H = pairwise_function(experiments, fn=hausdorff_distance, key='data')
-    print(H)
+    experiments = sorted(
+        experiments,
+        key=lambda x: (
+            x['dimension'],
+            x['length'],
+            x['n_walks'],
+            x['context'])
+    )
 
-    sns.heatmap(H)
+    experiments, n_groups = assign_groups(experiments)
+
+    # Data frame with stats; will be visualised later on.
+    df = []
+
+    for group in range(n_groups):
+        experiments_group = [e for e in experiments if e['group'] == group]
+        distances_in_group = pairwise_function(
+            experiments_group, fn=hausdorff_distance, key='data'
+        )
+
+        distances_in_group = distances_in_group.ravel()
+        distances_in_group = distances_in_group[distances_in_group > 0.0]
+
+        df.append(pd.DataFrame.from_dict({
+            'distances': distances_in_group.tolist(),
+            'group': group,
+            })
+        )
+
+    df = pd.concat(df)
+    df = df.astype({'group': 'int32'})
+
+    sns.boxplot(data=df, x=df['group'], y='distances')
+
     plt.show()

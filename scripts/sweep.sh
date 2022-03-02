@@ -14,7 +14,7 @@ for CONTEXT in 5 10; do
              --cpus-per-task=4      \
              --mem=4G               \
              --nice=10000           \
-             --wrap "poetry run python ../rawos/node2vec.py --length $LENGTH --dimension $DIMENSION --context $CONTEXT --epochs 200 "
+             --wrap "poetry run python ../rawos/node2vec.py --length $LENGTH --dimension $DIMENSION --context $CONTEXT --epochs 200 --keep "
     done
   done
 done

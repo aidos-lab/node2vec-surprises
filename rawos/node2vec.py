@@ -12,6 +12,8 @@ import pytorch_lightning as pl
 from torch_geometric.nn import Node2Vec
 from torch_geometric.utils import erdos_renyi_graph
 
+edge_index = None
+
 
 class node2vec(pl.LightningModule):
     """`node2vec` module."""
@@ -26,10 +28,13 @@ class node2vec(pl.LightningModule):
         """
         super().__init__()
 
-        edge_index = erdos_renyi_graph(
-            args.num_nodes,
-            args.edge_prob
-        )
+        global edge_index
+
+        if edge_index is None or not args.keep:
+            edge_index = erdos_renyi_graph(
+                args.num_nodes,
+                args.edge_prob
+            )
 
         self.model = Node2Vec(
             edge_index,
@@ -85,7 +90,7 @@ def main(args):
 
     # FIXME: Currently, we are never using the GPU because the detection
     # routine is not sufficiently smart to detect cases where we have
-    # CUDA but not available GPU. 
+    # CUDA but not available GPU.
     trainer = pl.Trainer(
         max_epochs=args.epochs,
         gpus=0,
@@ -102,6 +107,10 @@ def main(args):
     filename += f'-l{args.length}'
     filename += f'-n{args.num_walks}'
     filename += f'-p{args.edge_prob:.2f}'.replace('.', '_')
+
+    if args.keep:
+        filename += '-keep'
+
     filename += f'-{str(uuid.uuid4().hex)}'
     filename += '.tsv'
 
@@ -127,6 +136,13 @@ if __name__ == "__main__":
     # For ER graphs
     parser.add_argument('--num-nodes', type=int, default=200)
     parser.add_argument('--edge-prob', type=float, default=0.25)
+
+    parser.add_argument(
+        '-k', '--keep',
+        action='store_true',
+        help='If set, only creates one graph and never modifies it for '
+             'different runs of the script.'
+    )
 
     args = parser.parse_args()
 
