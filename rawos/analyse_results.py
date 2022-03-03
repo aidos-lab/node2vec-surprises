@@ -11,6 +11,7 @@ import scipy.stats as stats
 
 from metrics import diameter
 from metrics import hausdorff_distance
+from metrics import jensenshannon_distance
 from metrics import pairwise_function
 from metrics import wasserstein_distance
 
@@ -21,8 +22,10 @@ import matplotlib.pyplot as plt
 # configure this via `argparse`.
 fn_map = {
     'hausdorff': hausdorff_distance,
+    'js': jensenshannon_distance,
     'wasserstein': wasserstein_distance
 }
+
 
 def parse_filename(filename, normalise=True):
     """Parse filename into experiment description."""
