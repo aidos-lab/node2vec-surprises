@@ -10,10 +10,17 @@ import pandas as pd
 from metrics import diameter
 from metrics import hausdorff_distance
 from metrics import pairwise_function
+from metrics import wasserstein_distance
 
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+# Maps a function name to an actual `callable`, thus enabling us to
+# configure this via `argparse`.
+fn_map = {
+    'hausdorff': hausdorff_distance,
+    'wasserstein': wasserstein_distance
+}
 
 def parse_filename(filename, normalise=True):
     """Parse filename into experiment description."""
@@ -122,8 +129,16 @@ if __name__ == '__main__':
         default=None,
         help='Attribute by which to colour results.'
     )
+    parser.add_argument(
+        '-f', '--function',
+        type=str,
+        default='hausdorff',
+        help='Select pairwise analysis function'
+    )
 
     args = parser.parse_args()
+
+    pairwise_fn = fn_map[args.function]
 
     filenames = args.FILE
     experiments = [parse_filename(name) for name in filenames]
@@ -145,7 +160,7 @@ if __name__ == '__main__':
     for group in range(n_groups):
         experiments_group = [e for e in experiments if e['group'] == group]
         distances_in_group = pairwise_function(
-            experiments_group, fn=hausdorff_distance, key='data'
+            experiments_group, fn=pairwise_fn, key='data'
         )
 
         distances_in_group = distances_in_group.ravel()
