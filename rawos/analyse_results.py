@@ -7,6 +7,8 @@ import os
 import numpy as np
 import pandas as pd
 
+import scipy.stats as stats
+
 from metrics import diameter
 from metrics import hausdorff_distance
 from metrics import pairwise_function
@@ -185,6 +187,26 @@ if __name__ == '__main__':
         hue=args.hue,
         dodge=False
     )
+
+    df_per_group = {
+        name: col for name, col in df.groupby('group')['distances']
+    }
+
+    P = np.zeros((n_groups, n_groups))
+
+    for g1, x in df_per_group.items():
+        for g2, y in df_per_group.items():
+            if g1 <= g2:
+                continue
+
+            test = stats.wilcoxon(x, y)
+            P[g1, g2] = test.pvalue
+
+    P = 0.5 * (P + P.T)
+    P = P < 0.05 / (n_groups**2)
+
+    fig = plt.figure()
+    sns.heatmap(P, vmin=0, vmax=1.0, cmap='RdYlGn')
 
     plt.tight_layout()
     plt.show()
