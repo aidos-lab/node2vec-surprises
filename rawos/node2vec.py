@@ -34,7 +34,7 @@ class node2vec(pl.LightningModule):
         global edge_index
         global num_nodes
 
-        if edge_index is None or not args.keep:
+        if edge_index is None:
             edge_index = from_networkx(
                 les_miserables_graph()
             ).edge_index
@@ -133,13 +133,6 @@ if __name__ == "__main__":
     parser.add_argument('-n', '--num-walks', type=int, default=10)
 
     parser.add_argument('-N', '--num-runs', type=int, default=10)
-
-    parser.add_argument(
-        '-k', '--keep',
-        action='store_true',
-        help='If set, only creates one graph and never modifies it for '
-             'different runs of the script.'
-    )
 
     args = parser.parse_args()
 
