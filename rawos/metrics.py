@@ -4,6 +4,7 @@ import numpy as np
 import ot
 
 from sklearn.metrics import pairwise_distances
+from scipy.spatial.distance import jensenshannon
 
 
 def diameter(X, metric='euclidean'):
@@ -31,6 +32,36 @@ def hausdorff_distance(X, Y, metric='euclidean'):
     d_YX = np.max(np.min(distances, axis=0))
 
     return max(d_XY, d_YX)
+
+
+def jensenshannon_distance(X, Y):
+    """Computes the Jensen-Shannon distance of two embeddings of the same number of points"""
+    
+    diamx = diameter(X)
+    X = X/diamx
+    
+    diamy = metrics.diameter(Y)
+    Y = Y/diamy
+    
+    dX = pairwise_distances(X, metric='euclidean')
+    dY = pairwise_distances(Y, metric='euclidean')
+
+    DX = []
+    DY = []
+    for i in range(X.shape[0]): 
+        for j in range(i+1, X.shape[0]): 
+            DX.append(dX[i,j])
+
+    for i in range(Y.shape[0]): 
+        for j in range(i+1, Y.shape[0]): 
+            DY.append(dY[i,j])
+
+    DistX, binsX, patches = plt.hist(DX, bins = 100)
+
+    DistY, binsY, patches = plt.hist(DY, bins = 100)
+    ## uses base e, upper bound of JSD is ln(2)
+    ## in base b upper boud of JSD is log_b(2)
+    return  jensenshannon(DistY, DistX, base=None) 
 
 
 def wasserstein_distance(X, Y, metric='euclidean'):
