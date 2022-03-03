@@ -35,6 +35,10 @@ def jensenshannon_distance(filename1, filename2):
     for i in range(X.shape[0]): 
         for j in range(i+1, X.shape[0]): 
             DX.append(dX[i,j])
+
+
+    for i in range(Y.shape[0]): 
+        for j in range(i+1, Y.shape[0]): 
             DY.append(dY[i,j])
 
     DistX, binsX, patches = plt.hist(DX, bins = 100)
@@ -51,6 +55,9 @@ def jensenshannon_distance(filename1, filename2):
 def distance_correlation(filename1, filename2):
 	""" computes  the correlation between the distance matrices of two point clouds
 		by only considering the upper triangle part of the matrices in order to avoid redundant values and the zeros on the diagonal
+    /!\ for this to make sense we need the point clouds to come from the same graphs and be ordered the same way!!
+        --> otherwise use mantel or dcov test
+
 	"""
 
 
