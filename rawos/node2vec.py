@@ -10,9 +10,12 @@ import numpy as np
 import pytorch_lightning as pl
 
 from torch_geometric.nn import Node2Vec
-from torch_geometric.utils import erdos_renyi_graph
+from torch_geometric.utils.convert import from_networkx
+
+from networkx.generators import les_miserables_graph
 
 edge_index = None
+num_nodes = 0
 
 
 class node2vec(pl.LightningModule):
@@ -29,12 +32,14 @@ class node2vec(pl.LightningModule):
         super().__init__()
 
         global edge_index
+        global num_nodes
 
         if edge_index is None or not args.keep:
-            edge_index = erdos_renyi_graph(
-                args.num_nodes,
-                args.edge_prob
-            )
+            edge_index = from_networkx(
+                les_miserables_graph()
+            ).edge_index
+
+            num_nodes = les_miserables_graph().number_of_nodes()
 
         self.model = Node2Vec(
             edge_index,
@@ -78,7 +83,7 @@ def main(args):
     model = node2vec(args)
 
     train_loader = model.model.loader(
-        batch_size=args.num_nodes,
+        batch_size=num_nodes,
         shuffle=True,
         num_workers=4
     )
@@ -101,15 +106,11 @@ def main(args):
     model.eval()
     z = model.get_embedding()
 
-    filename = 'er'
+    filename = 'lm'
     filename += f'-c{args.context}'
     filename += f'-d{args.dimension}'
     filename += f'-l{args.length}'
     filename += f'-n{args.num_walks}'
-    filename += f'-p{args.edge_prob:.2f}'.replace('.', '_')
-
-    if args.keep:
-        filename += '-keep'
 
     filename += f'-{str(uuid.uuid4().hex)}'
     filename += '.tsv'
@@ -132,10 +133,6 @@ if __name__ == "__main__":
     parser.add_argument('-n', '--num-walks', type=int, default=10)
 
     parser.add_argument('-N', '--num-runs', type=int, default=10)
-
-    # For ER graphs
-    parser.add_argument('--num-nodes', type=int, default=200)
-    parser.add_argument('--edge-prob', type=float, default=0.25)
 
     parser.add_argument(
         '-k', '--keep',
