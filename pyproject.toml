@@ -18,6 +18,7 @@ torch-geometric = "^2.0.3"
 pytorch-lightning = "^1.5.10"
 scikit-learn = "^1.0.2"
 dcov = {git = "https://github.com/Pseudomanifold/dcov"}
+POT = "^0.8.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
