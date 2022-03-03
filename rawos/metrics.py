@@ -1,6 +1,7 @@
 """Metrics and pseudo-metrics for comparing point clouds."""
 
 import numpy as np
+import ot
 
 from sklearn.metrics import pairwise_distances
 
@@ -30,6 +31,24 @@ def hausdorff_distance(X, Y, metric='euclidean'):
     d_YX = np.max(np.min(distances, axis=0))
 
     return max(d_XY, d_YX)
+
+
+def wasserstein_distance(X, Y, metric='euclidean'):
+    """Calculate Wasserstein distance between point clouds.
+
+    Calculates the Wasserstein distance between two finite metric
+    spaces, i.e. two finite point clouds, using ``metric`` as its
+    base metric.
+    """
+    M = ot.dist(X, Y, metric=metric)
+    M /= M.max()
+
+    # Uniform weights for all samples.
+    a = np.ones((len(X), ))
+    b = np.ones((len(Y), ))
+
+    dist = ot.emd2(a, b, M)
+    return dist
 
 
 def pairwise_function(X, fn, Y=None, key=None):
