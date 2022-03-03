@@ -40,7 +40,7 @@ def jensenshannon_distance(X, Y):
     diamx = diameter(X)
     X = X/diamx
     
-    diamy = metrics.diameter(Y)
+    diamy = diameter(Y)
     Y = Y/diamy
     
     dX = pairwise_distances(X, metric='euclidean')
@@ -56,9 +56,15 @@ def jensenshannon_distance(X, Y):
         for j in range(i+1, Y.shape[0]): 
             DY.append(dY[i,j])
 
-    DistX, binsX, patches = plt.hist(DX, bins = 100)
+    DistX, binsX = np.histogram(DX, bins=100)
+    DistY, binsY = np.histogram(DY, bins=100)
 
-    DistY, binsY, patches = plt.hist(DY, bins = 100)
+    DistX = DistX.astype(np.float)
+    DistY = DistY.astype(np.float)
+
+    DistX /= DistX.sum()
+    DistY /= DistY.sum()
+
     ## uses base e, upper bound of JSD is ln(2)
     ## in base b upper boud of JSD is log_b(2)
     return  jensenshannon(DistY, DistX, base=None) 
