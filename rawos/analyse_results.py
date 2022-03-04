@@ -12,18 +12,23 @@ import scipy.stats as stats
 from metrics import diameter
 from metrics import hausdorff_distance
 from metrics import jensenshannon_distance
-from metrics import pairwise_function
+from metrics import total_persistence_point_cloud
 from metrics import wasserstein_distance
+
+from metrics import pairwise_function
+from metrics import summary_statistic_function
 
 import seaborn as sns
 import matplotlib.pyplot as plt
 
 # Maps a function name to an actual `callable`, thus enabling us to
-# configure this via `argparse`.
+# configure this via `argparse`. The second entry indicates whether
+# a measure permits pairwise comparisons. 
 fn_map = {
-    'hausdorff': hausdorff_distance,
-    'js': jensenshannon_distance,
-    'wasserstein': wasserstein_distance
+    'hausdorff': (hausdorff_distance, True),
+    'js': (jensenshannon_distance, True),
+    'total_persistence': (total_persistence_point_cloud, False),
+    'wasserstein': (wasserstein_distance, True)
 }
 
 
@@ -143,7 +148,8 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    pairwise_fn = fn_map[args.function]
+    stats_fn = fn_map[args.function][0]
+    pairwise = fn_map[args.function][1]
 
     filenames = args.FILE
     experiments = [parse_filename(name) for name in filenames]
@@ -164,19 +170,42 @@ if __name__ == '__main__':
 
     for group in range(n_groups):
         experiments_group = [e for e in experiments if e['group'] == group]
-        distances_in_group = pairwise_function(
-            experiments_group, fn=pairwise_fn, key='data'
-        )
 
-        distances_in_group = distances_in_group.ravel()
-        distances_in_group = distances_in_group[distances_in_group > 0.0]
+        # Pairwise comparisons are possible between members of each
+        # group.
+        if pairwise:
+            distances_in_group = pairwise_function(
+                experiments_group, fn=stats_fn, key='data'
+            )
+
+            distances_in_group = distances_in_group.ravel()
+            distances_in_group = distances_in_group[distances_in_group > 0.0]
+
+            row = {'distances': distances_in_group.tolist()}
+
+        # We can only extract statistics for group members.
+        else:
+            stats = summary_statistic_function(
+                experiments_group, fn=stats_fn, key='data'
+            )
+
+            stats = stats.squeeze()
+
+            # Assume that we are getting more than one value, such as
+            # a total persistence value for each dimension.
+            if len(stats.shape) > 1:
+                row = {
+                    f'stats_d{d}': stats_.tolist()
+                    for d, stats_ in enumerate(stats.T)
+                }
+            else:
+                row = {'stats': stats.tolist()}
 
         parameters = get_variable_parameters(
             experiments_group[0],
             as_string=False
         )
 
-        row = {'distances': distances_in_group.tolist()}
         row.update(parameters)
 
         df.append(pd.DataFrame.from_dict(row))
@@ -206,7 +235,7 @@ if __name__ == '__main__':
             P[g1, g2] = test.pvalue
 
     P = 0.5 * (P + P.T)
-    P = P < 0.05 / (n_groups**2)
+    P = P < 0.05 / (0.5 * n_groups * (n_groups - 1))
 
     fig = plt.figure()
     sns.heatmap(P, vmin=0, vmax=1.0, cmap='RdYlGn')
