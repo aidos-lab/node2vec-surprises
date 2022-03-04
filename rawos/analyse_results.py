@@ -1,6 +1,7 @@
 """Main analysis script."""
 
 import argparse
+import itertools
 import json
 import os
 
@@ -137,19 +138,37 @@ def assign_groups(experiments):
 def analyse_distances(args, experiments, n_groups):
     """Analyse and visualise inter- and intra-group distances."""
     dimensions = sorted(set([e['dimension'] for e in experiments]))
-    for dimension in dimensions:
-        experiments_dimension = [
-            e for e in experiments if e['dimension'] == dimension
-        ]
+
+    data = []
+
+    for x, y in itertools.combinations_with_replacement(range(n_groups), 2):
+        X = [e for e in experiments if e['group'] == x]
+        Y = [e for e in experiments if e['group'] == y]
+
+        if x == y:
+            Y = None
 
         distances = pairwise_function(
-            experiments_dimension,
-            fn=stats_fn,
-            key='data'
+            X, stats_fn, Y=Y, key='data'
         )
 
-        sns.heatmap(distances, cmap='Spectral')
-        plt.figure()
+        data.append(pd.DataFrame.from_dict({
+            'group1': x,
+            'group2': y,
+            'distances':  distances[distances > 0.0].ravel().tolist()
+        }))
+
+
+    df = pd.concat(data)
+    print(df)
+
+    for name, df_ in df.groupby(['group1', 'group2']):
+        sns.histplot(
+            data=df_,
+            x='distances',
+            label=name,
+            kde=True,
+        )
 
     plt.show()
 
