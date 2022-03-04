@@ -3,7 +3,10 @@
 import numpy as np
 import ot
 
+from gtda.homology import VietorisRipsPersistence
+
 from sklearn.metrics import pairwise_distances
+
 from scipy.spatial.distance import jensenshannon
 
 
@@ -88,6 +91,43 @@ def wasserstein_distance(X, Y, metric='euclidean'):
     return dist
 
 
+def get_dimension(diagram, dim=0):
+    """Get specific dimension of a persistence diagram."""
+    mask = diagram[..., 2] == dim
+    diagram = diagram[mask][:, :2]
+    return diagram
+
+
+def total_persistence(diagram, dim=0, p=2):
+    """Calculate total persistence of a persistence diagram."""
+    diagram = get_dimension(diagram, dim)
+
+    persistence = np.diff(diagram)
+    persistence = persistence[np.isfinite(persistence)]
+
+    # Ensure that the simplification is only performed over a given
+    # axis.
+    result = np.sum(np.power(np.abs(persistence), p), axis=0)
+    return result
+
+
+def total_persistence_point_cloud(X, max_dim=1): 
+    """Calculate total persistence values of a point cloud."""
+    ph = VietorisRipsPersistence(
+        metric='euclidean',
+        homology_dimensions=tuple(range(max_dim + 1)),
+        infinity_values=None
+    ).fit_transform([X])
+
+    diagrams = ph[0]
+
+    total_pers = []
+    for i in range(max_dim+1): 
+        total_pers.append(total_persistence(diagrams, dim=i))
+        
+    return np.asarray(total_pers)
+    
+
 def pairwise_function(X, fn, Y=None, key=None):
     """Pairwise scalar value calculation with an arbitrary function."""
     n = len(X)
@@ -105,3 +145,16 @@ def pairwise_function(X, fn, Y=None, key=None):
                 D[i, j] = fn(x[key], y[key])
 
     return D
+
+
+def summary_statistic_function(X, fn, key=None):
+    """Scalar value calculation with an arbitrary function."""
+    values = []
+
+    for x in X:
+        if key is None:
+            values.append(fn(x))
+        else:
+            values.append(fn(x[key]))
+
+    return np.asarray(values)
