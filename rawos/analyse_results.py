@@ -13,6 +13,7 @@ from metrics import diameter
 from metrics import hausdorff_distance
 from metrics import jensenshannon_distance
 from metrics import mean_distance
+from metrics import persistent_entropy_point_cloud
 from metrics import total_persistence_point_cloud
 from metrics import wasserstein_distance
 
@@ -24,11 +25,12 @@ import matplotlib.pyplot as plt
 
 # Maps a function name to an actual `callable`, thus enabling us to
 # configure this via `argparse`. The second entry indicates whether
-# a measure permits pairwise comparisons. 
+# a measure permits pairwise comparisons.
 fn_map = {
     'hausdorff': (hausdorff_distance, True),
     'js': (jensenshannon_distance, True),
     'mean_distance': (mean_distance, False),
+    'persistent_entropy': (persistent_entropy_point_cloud, False),
     'total_persistence': (total_persistence_point_cloud, False),
     'wasserstein': (wasserstein_distance, True)
 }
