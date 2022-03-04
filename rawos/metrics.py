@@ -133,6 +133,43 @@ def mean_distance(X):
     return np.mean(D)
 
 
+def persistent_entropy(diagram, dim=0):
+    """Calculate persistent entropy of a diagram."""
+    diagrams = get_dimension(diagram, dim)
+
+    persistence = np.diff(diagram)
+    persistence = persistence[np.isfinite(persistence)]
+
+    persistence_sum = np.sum(persistence)
+    probabilities = persistence / persistence_sum
+
+    # Ensures that a probability of zero will just result in
+    # a logarithm of zero as well. This is required whenever
+    # one deals with entropy calculations.
+    log_prob = np.log2(probabilities,
+                       out=np.zeros_like(probabilities),
+                       where=(probabilities > 0))
+
+    return np.sum(-probabilities * log_prob)
+
+
+def persistent_entropy_point_cloud(X, max_dim=1):
+    """Calculate persistent entropy values of a point cloud."""
+    ph = VietorisRipsPersistence(
+        metric='euclidean',
+        homology_dimensions=tuple(range(max_dim + 1)),
+        infinity_values=None
+    ).fit_transform([X])
+
+    diagrams = ph[0]
+
+    entropies = []
+    for i in range(max_dim + 1):
+        entropies.append(persistent_entropy(diagrams, dim=i))
+
+    return np.asarray(entropies)
+
+
 def pairwise_function(X, fn, Y=None, key=None):
     """Pairwise scalar value calculation with an arbitrary function."""
     n = len(X)

@@ -134,7 +134,28 @@ def assign_groups(experiments):
     return experiments, len(unique_parameters)
 
 
-def analyse_statistics(args, experiments):
+def analyse_distances(args, experiments, n_groups):
+    """Analyse and visualise inter- and intra-group distances."""
+    dimensions = sorted(set([e['dimension'] for e in experiments]))
+    for dimension in dimensions:
+        experiments_dimension = [
+            e for e in experiments if e['dimension'] == dimension
+        ]
+
+        print(experiments_dimension)
+
+        distances = pairwise_function(
+            experiments_dimension,
+            fn=stats_fn,
+            key='data'
+        )
+
+        sns.heatmap(distances, vmin=0.0, cmap='Spectral')
+        
+    plt.show()
+
+
+def analyse_statistics(args, experiments, n_groups):
     """Analyse and visualise statistics."""
     # Data frame with stats; will be visualised later on.
     df = []
@@ -288,6 +309,6 @@ if __name__ == '__main__':
     # distances or visualising statistics.
 
     if args.distances:
-        analyse_distances()
+        analyse_distances(args, experiments, n_groups)
     else:
-        analyse_statistics(args, experiments)
+        analyse_statistics(args, experiments, n_groups)
