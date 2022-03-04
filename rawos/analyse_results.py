@@ -191,12 +191,16 @@ if __name__ == '__main__':
 
             stats = stats.squeeze()
 
+            stats_dimensions = []
+            for d, _ in enumerate(stats.T):
+                stats_dimensions.extend([d] * len(stats))
+
             # Assume that we are getting more than one value, such as
             # a total persistence value for each dimension.
             if len(stats.shape) > 1:
                 row = {
-                    f'stats_d{d}': stats_.tolist()
-                    for d, stats_ in enumerate(stats.T)
+                    'stats': stats.T.ravel().tolist(),
+                    'stats_dimension': stats_dimensions
                 }
             else:
                 row = {'stats': stats.tolist()}
@@ -213,32 +217,41 @@ if __name__ == '__main__':
     df = pd.concat(df)
     df = df.astype({'group': 'int32'})
 
-    sns.boxplot(
-        data=df,
-        x=df['group'], y='distances',
-        hue=args.hue,
-        dodge=False
-    )
+    attribute = 'distances' if 'distances' in df.columns else 'stats'
 
-    df_per_group = {
-        name: col for name, col in df.groupby('group')['distances']
-    }
+    if 'stats_dimension' in df.columns:
+        g = sns.FacetGrid(data=df, col='stats_dimension')
+        g.map_dataframe(sns.boxplot, x='group', y='stats')
+    else:
+        sns.boxplot(
+            data=df,
+            x=df['group'], y=attribute,
+            hue=args.hue,
+            dodge=False
+        )
 
-    P = np.zeros((n_groups, n_groups))
+    # Can only analyse statistical significance if we are dealing with
+    # distances.
+    if attribute == 'distances':
+        df_per_group = {
+            name: col for name, col in df.groupby('group')['distances']
+        }
 
-    for g1, x in df_per_group.items():
-        for g2, y in df_per_group.items():
-            if g1 <= g2:
-                continue
+        P = np.zeros((n_groups, n_groups))
 
-            test = stats.wilcoxon(x, y)
-            P[g1, g2] = test.pvalue
+        for g1, x in df_per_group.items():
+            for g2, y in df_per_group.items():
+                if g1 <= g2:
+                    continue
 
-    P = 0.5 * (P + P.T)
-    P = P < 0.05 / (0.5 * n_groups * (n_groups - 1))
+                test = stats.wilcoxon(x, y)
+                P[g1, g2] = test.pvalue
 
-    fig = plt.figure()
-    sns.heatmap(P, vmin=0, vmax=1.0, cmap='RdYlGn')
+        P = 0.5 * (P + P.T)
+        P = P < 0.05 / (0.5 * n_groups * (n_groups - 1))
+
+        fig = plt.figure()
+        sns.heatmap(P, vmin=0, vmax=1.0, cmap='RdYlGn')
 
     plt.tight_layout()
     plt.show()
