@@ -7,7 +7,7 @@ import os
 import numpy as np
 import pandas as pd
 
-import scipy.stats as stats
+import scipy.stats
 
 from metrics import diameter
 from metrics import hausdorff_distance
@@ -134,41 +134,8 @@ def assign_groups(experiments):
     return experiments, len(unique_parameters)
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('FILE', type=str, help='Input file(s)', nargs='+')
-    parser.add_argument(
-        '--hue',
-        type=str,
-        default=None,
-        help='Attribute by which to colour results.'
-    )
-    parser.add_argument(
-        '-f', '--function',
-        type=str,
-        default='hausdorff',
-        help='Select pairwise analysis function'
-    )
-
-    args = parser.parse_args()
-
-    stats_fn = fn_map[args.function][0]
-    pairwise = fn_map[args.function][1]
-
-    filenames = args.FILE
-    experiments = [parse_filename(name) for name in filenames]
-
-    experiments = sorted(
-        experiments,
-        key=lambda x: (
-            x['dimension'],
-            x['length'],
-            x['n_walks'],
-            x['context'])
-    )
-
-    experiments, n_groups = assign_groups(experiments)
-
+def analyse_statistics(args, experiments):
+    """Analyse and visualise statistics."""
     # Data frame with stats; will be visualised later on.
     df = []
 
@@ -259,14 +226,68 @@ if __name__ == '__main__':
                 if g1 <= g2:
                     continue
 
-                test = stats.wilcoxon(x, y)
+                test = scipy.stats.wilcoxon(x, y)
                 P[g1, g2] = test.pvalue
 
         P = 0.5 * (P + P.T)
         P = P < 0.05 / (0.5 * n_groups * (n_groups - 1))
 
-        fig = plt.figure()
+        plt.figure()
         sns.heatmap(P, vmin=0, vmax=1.0, cmap='RdYlGn')
 
     plt.tight_layout()
     plt.show()
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('FILE', type=str, help='Input file(s)', nargs='+')
+    parser.add_argument(
+        '--hue',
+        type=str,
+        default=None,
+        help='Attribute by which to colour results.'
+    )
+    parser.add_argument(
+        '-f', '--function',
+        type=str,
+        default='hausdorff',
+        help='Select pairwise analysis function'
+    )
+
+    parser.add_argument(
+        '-d', '--distances',
+        action='store_true',
+        help='If set, analyses inter- and intra-group distances. Only works '
+             'if the selected function permits pairwse comparisons.'
+    )
+
+    args = parser.parse_args()
+
+    stats_fn = fn_map[args.function][0]
+    pairwise = fn_map[args.function][1]
+
+    if args.distances:
+        assert pairwise
+
+    filenames = args.FILE
+    experiments = [parse_filename(name) for name in filenames]
+
+    experiments = sorted(
+        experiments,
+        key=lambda x: (
+            x['dimension'],
+            x['length'],
+            x['n_walks'],
+            x['context'])
+    )
+
+    experiments, n_groups = assign_groups(experiments)
+
+    # Determine which mode to follow here. We are either analysing
+    # distances or visualising statistics.
+
+    if args.distances:
+        analyse_distances()
+    else:
+        analyse_statistics(args, experiments)
