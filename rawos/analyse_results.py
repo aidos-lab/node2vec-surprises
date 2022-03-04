@@ -158,16 +158,16 @@ def analyse_distances(args, experiments, n_groups):
             'distances':  distances[distances > 0.0].ravel().tolist()
         }))
 
-
     df = pd.concat(data)
     print(df)
 
     for name, df_ in df.groupby(['group1', 'group2']):
-        sns.histplot(
+        sns.kdeplot(
             data=df_,
             x='distances',
             label=name,
-            kde=True,
+            c='k' if name[0] == name[1] else 'b',
+            common_norm=True,
         )
 
     plt.show()
