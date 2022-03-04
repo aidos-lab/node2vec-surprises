@@ -15,7 +15,7 @@ import scipy
 from scipy import special
 from scipy.stats import pearsonr
 import skbio
-
+import dcov
 
 def jensenshannon_distance(filename1, filename2):
     """Computes the Jensen-Shanon distance of two embeddings"""
@@ -115,5 +115,25 @@ def Mantel_test(filename1, filename2, method = 'pearson', permutations = 100):
     pval = Mantel[1]
     
     return corr, pval
+
+
+
+def dCor(filename1, filename2):
+    """ Computes the distance correlation as 
+        in the paper 'graph pseudo metrics from a topological point of view'
+    """
+    X= np.loadtxt(filename1, delimiter="\t")
+    diamx = metrics.diameter(X)
+    X= X/diamx
+
+    Y= np.loadtxt(filename2, delimiter="\t")
+    diamy = metrics.diameter(Y)
+    Y= Y/diamy
+    
+    dcov_XY = dcov.dcov(X,Y,euclidean_distance)
+    dvar_X = np.sqrt(dcov.dcov(X,X,euclidean_distance))
+    dvar_Y = np.sqrt(dcov.dcov(Y,Y,euclidean_distance))
+    
+    return np.sqrt(dcov_XY/(dvar_X*dvar_Y))
     
 
