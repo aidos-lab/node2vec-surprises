@@ -142,16 +142,15 @@ def analyse_distances(args, experiments, n_groups):
             e for e in experiments if e['dimension'] == dimension
         ]
 
-        print(experiments_dimension)
-
         distances = pairwise_function(
             experiments_dimension,
             fn=stats_fn,
             key='data'
         )
 
-        sns.heatmap(distances, vmin=0.0, cmap='Spectral')
-        
+        sns.heatmap(distances, cmap='Spectral')
+        plt.figure()
+
     plt.show()
 
 
