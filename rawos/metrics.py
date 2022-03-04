@@ -111,7 +111,7 @@ def total_persistence(diagram, dim=0, p=2):
     return result
 
 
-def total_persistence_point_cloud(X, max_dim=1): 
+def total_persistence_point_cloud(X, max_dim=1):
     """Calculate total persistence values of a point cloud."""
     ph = VietorisRipsPersistence(
         metric='euclidean',
@@ -122,11 +122,11 @@ def total_persistence_point_cloud(X, max_dim=1):
     diagrams = ph[0]
 
     total_pers = []
-    for i in range(max_dim+1): 
+    for i in range(max_dim + 1):
         total_pers.append(total_persistence(diagrams, dim=i))
-        
+
     return np.asarray(total_pers)
-    
+
 
 def pairwise_function(X, fn, Y=None, key=None):
     """Pairwise scalar value calculation with an arbitrary function."""
