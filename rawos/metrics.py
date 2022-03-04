@@ -128,6 +128,11 @@ def total_persistence_point_cloud(X, max_dim=1):
     return np.asarray(total_pers)
 
 
+def mean_distance(X):
+    D = pairwise_distances(X, metric='euclidean')
+    return np.mean(D)
+
+
 def pairwise_function(X, fn, Y=None, key=None):
     """Pairwise scalar value calculation with an arbitrary function."""
     n = len(X)

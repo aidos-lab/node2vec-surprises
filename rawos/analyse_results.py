@@ -12,6 +12,7 @@ import scipy.stats as stats
 from metrics import diameter
 from metrics import hausdorff_distance
 from metrics import jensenshannon_distance
+from metrics import mean_distance
 from metrics import total_persistence_point_cloud
 from metrics import wasserstein_distance
 
@@ -27,6 +28,7 @@ import matplotlib.pyplot as plt
 fn_map = {
     'hausdorff': (hausdorff_distance, True),
     'js': (jensenshannon_distance, True),
+    'mean_distance': (mean_distance, False),
     'total_persistence': (total_persistence_point_cloud, False),
     'wasserstein': (wasserstein_distance, True)
 }
@@ -215,7 +217,7 @@ if __name__ == '__main__':
         df.append(pd.DataFrame.from_dict(row))
 
     df = pd.concat(df)
-    df = df.astype({'group': 'int32'})
+    df['group'] = df['group'].astype('category')
 
     attribute = 'distances' if 'distances' in df.columns else 'stats'
 
@@ -232,6 +234,7 @@ if __name__ == '__main__':
             hue=args.hue,
             dodge=False,
         )
+        g.add_legend()
     else:
         sns.boxplot(
             data=df,
