@@ -220,7 +220,11 @@ if __name__ == '__main__':
     attribute = 'distances' if 'distances' in df.columns else 'stats'
 
     if 'stats_dimension' in df.columns:
-        g = sns.FacetGrid(data=df, col='stats_dimension')
+        g = sns.FacetGrid(
+            data=df,
+            row='stats_dimension',
+            sharey=False, sharex=True
+        )
         g.map_dataframe(sns.boxplot, x='group', y='stats')
     else:
         sns.boxplot(
