@@ -225,7 +225,13 @@ if __name__ == '__main__':
             row='stats_dimension',
             sharey=False, sharex=True
         )
-        g.map_dataframe(sns.boxplot, x='group', y='stats')
+        g.map_dataframe(
+            sns.boxplot,
+            x='group',
+            y='stats',
+            hue=args.hue,
+            dodge=False,
+        )
     else:
         sns.boxplot(
             data=df,
