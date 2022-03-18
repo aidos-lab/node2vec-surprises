@@ -21,3 +21,11 @@ Running the code (example):
     $ python analyse_results.py ../results/lm/*.tsv  --hue dimension --function mean_distance
     $ python analyse_results.py ../results/lm/*.tsv  --hue dimension --function hausdorff
     $ python analyse_results.py ../results/lm/*.tsv  --hue dimension --function wasserstein
+
+Alternatively, we can also visualise kernel density estimates of
+intra-group and inter-group distances:
+
+    $ python analyse_results.py ../results/lm/*-d64*.tsv  --hue dimension --function wasserstein -d
+
+Note that this only works for pairwise distance metrics such as the
+Wasserstein distance.
