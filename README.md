@@ -13,3 +13,11 @@ Running the code (example):
     # You can select different point clouds to visualise here. The
     # gallery script is sufficiently smart to enlarge its grid.
     $ python gallery.py ../results/lm/*-d64*.tsv
+
+### Analysing distributions
+
+    # The script is smart enough to check whether pairwise distances
+    # can be calculated and compared here.
+    $ python analyse_results.py ../results/lm/*.tsv  --hue dimension --function mean_distance
+    $ python analyse_results.py ../results/lm/*.tsv  --hue dimension --function hausdorff
+    $ python analyse_results.py ../results/lm/*.tsv  --hue dimension --function wasserstein
