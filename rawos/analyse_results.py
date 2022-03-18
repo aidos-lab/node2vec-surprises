@@ -164,8 +164,10 @@ def analyse_distances(args, experiments, n_groups):
             data=df_,
             x='distances',
             label=name,
-            c='k' if name[0] == name[1] else 'b',
+            color='k' if name[0] == name[1] else 'b',
             common_norm=True,
+            fill=True,
+            alpha=0.1,
         )
 
     plt.show()
