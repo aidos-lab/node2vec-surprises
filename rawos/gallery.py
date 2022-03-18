@@ -37,7 +37,9 @@ if __name__ == '__main__':
         n_rows,
         n_cols,
         sharex=False,
-        sharey=False)
+        sharey=False,
+        figsize=(8, 8)
+    )
 
     for ax in axes.ravel():
         ax.set_xticks([])
@@ -57,4 +59,6 @@ if __name__ == '__main__':
 
     plt.tight_layout(pad=0.0)
     plt.subplots_adjust(hspace=0, wspace=0)
+
+    plt.savefig('/tmp/node2vec_gallery.png')
     plt.show()
