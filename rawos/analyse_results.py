@@ -137,8 +137,6 @@ def assign_groups(experiments):
 
 def analyse_distances(args, experiments, n_groups):
     """Analyse and visualise inter- and intra-group distances."""
-    dimensions = sorted(set([e['dimension'] for e in experiments]))
-
     data = []
 
     for x, y in itertools.combinations_with_replacement(range(n_groups), 2):
@@ -298,7 +296,7 @@ if __name__ == '__main__':
         '-d', '--distances',
         action='store_true',
         help='If set, analyses inter- and intra-group distances. Only works '
-             'if the selected function permits pairwse comparisons.'
+             'if the selected function permits pairwise comparisons.'
     )
 
     args = parser.parse_args()
