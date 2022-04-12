@@ -1,13 +1,17 @@
 """Metrics and pseudo-metrics for comparing point clouds."""
 
+import networkx as nx
 import numpy as np
+
 import ot
 
 from gtda.homology import VietorisRipsPersistence
 
 from sklearn.metrics import pairwise_distances
+from sklearn.metrics import pairwise_kernels
 
 from scipy.spatial.distance import jensenshannon
+from scipy.stats import entropy
 
 
 def diameter(X, metric='euclidean'):
@@ -35,6 +39,20 @@ def hausdorff_distance(X, Y, metric='euclidean'):
     d_YX = np.max(np.min(distances, axis=0))
 
     return max(d_XY, d_YX)
+
+
+def link_distributions_kl(X):
+    """Evaluate Kullback--Leibler divergence of link distributions."""
+    # TODO: Make comparison graph configurable
+    G = nx.generators.les_miserables_graph()
+    A = nx.adjacency_matrix(G, weight=None).toarray()
+
+    P_original = A / A.sum(axis=0)
+    P_observed = 1 / (1 + np.exp(-pairwise_kernels(X)))
+
+    # Evaluates to the KL divergence between the two empirical link
+    # distributions.
+    return entropy(pk=P_original.ravel(), qk=P_observed.ravel())
 
 
 def jensenshannon_distance(X, Y):
