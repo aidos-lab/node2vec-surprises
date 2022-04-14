@@ -27,4 +27,4 @@ if __name__ == '__main__':
     rng = np.random.default_rng()
     X = rng.normal(size=(n, d))
 
-    np.savetxt(sys.stdout, X, fmt='%.4f')
+    np.savetxt(sys.stdout, X, fmt='%.4f', delimiter='\t')
