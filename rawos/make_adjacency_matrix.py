@@ -25,4 +25,4 @@ if __name__ == '__main__':
         G = lm()
 
     A = nx.adjacency_matrix(G, weight=None).toarray()
-    np.savetxt('/tmp/A.txt', A, fmt='%.4f')
+    np.savetxt('/tmp/A.txt', A, fmt='%d')
