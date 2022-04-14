@@ -46,7 +46,7 @@ def link_distributions_kl(X, A=None, **kwargs):
     if A is None:
         return np.inf
 
-    P_original = A / A.sum(axis=0)
+    P_original = A / (0.5 * np.sum(A))
     P_observed = 1 / (1 + np.exp(-pairwise_kernels(X)))
 
     # Evaluates to the KL divergence between the two empirical link
