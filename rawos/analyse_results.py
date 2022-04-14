@@ -180,6 +180,8 @@ def analyse_statistics(args, experiments, n_groups):
     # Data frame with stats; will be visualised later on.
     df = []
 
+    A = np.loadtxt(args.adjacency) if args.adjacency is not None else None
+
     for group in range(n_groups):
         experiments_group = [e for e in experiments if e['group'] == group]
 
@@ -187,7 +189,7 @@ def analyse_statistics(args, experiments, n_groups):
         # group.
         if pairwise:
             distances_in_group = pairwise_function(
-                experiments_group, fn=stats_fn, key='data'
+                experiments_group, fn=stats_fn, key='data', A=A
             )
 
             distances_in_group = distances_in_group.ravel()
@@ -198,7 +200,7 @@ def analyse_statistics(args, experiments, n_groups):
         # We can only extract statistics for group members.
         else:
             stats = summary_statistic_function(
-                experiments_group, fn=stats_fn, key='data'
+                experiments_group, fn=stats_fn, key='data', A=A
             )
 
             stats = stats.squeeze()
@@ -301,6 +303,13 @@ if __name__ == '__main__':
         action='store_true',
         help='If set, analyses inter- and intra-group distances. Only works '
              'if the selected function permits pairwise comparisons.'
+    )
+
+    parser.add_argument(
+        '-a', '--adjacency',
+        type=str,
+        help='If set, loads adjacency matrix from specified path. This will '
+              'be required for link distribution analysis.'
     )
 
     args = parser.parse_args()
