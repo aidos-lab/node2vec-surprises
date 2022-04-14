@@ -11,7 +11,7 @@ from sklearn.metrics import pairwise_distances
 from sklearn.metrics import pairwise_kernels
 
 from scipy.spatial.distance import jensenshannon
-from scipy.stats import wasserstein_distance as wasserstein
+from scipy.stats import wasserstein_distance as emd
 
 
 def diameter(X, metric='euclidean', **kwargs):
@@ -41,8 +41,8 @@ def hausdorff_distance(X, Y, metric='euclidean', **kwargs):
     return max(d_XY, d_YX)
 
 
-def link_distributions_kl(X, A=None, **kwargs):
-    """Evaluate Kullback--Leibler divergence of link distributions."""
+def link_distributions_emd(X, A=None, **kwargs):
+    """Evaluate Earth Mover's Distance between link distributions."""
     if A is None:
         return np.inf
 
@@ -57,9 +57,7 @@ def link_distributions_kl(X, A=None, **kwargs):
     P_observed = P_observed[np.triu_indices(n, k=1)]
     P_observed /= np.sum(P_observed)
 
-    # Evaluates to the KL divergence between the two empirical link
-    # distributions.
-    return wasserstein(P_original.ravel(), P_observed.ravel())
+    return emd(P_original.ravel(), P_observed.ravel())
 
 
 def jensenshannon_distance(X, Y, **kwargs):
