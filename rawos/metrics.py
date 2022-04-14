@@ -11,7 +11,7 @@ from sklearn.metrics import pairwise_distances
 from sklearn.metrics import pairwise_kernels
 
 from scipy.spatial.distance import jensenshannon
-from scipy.stats import entropy
+from scipy.stats import wasserstein_distance as wasserstein
 
 
 def diameter(X, metric='euclidean', **kwargs):
@@ -47,11 +47,16 @@ def link_distributions_kl(X, A=None, **kwargs):
         return np.inf
 
     P_original = A / (0.5 * np.sum(A))
+
+    # Create empirical 'observed' link distribution and normalise it
+    # afterwards. Some statistical distances require normalised data
+    # so this ensures overall validity.
     P_observed = 1 / (1 + np.exp(-pairwise_kernels(X)))
+    P_observed  /= np.sum(P_observed)
 
     # Evaluates to the KL divergence between the two empirical link
     # distributions.
-    return entropy(pk=P_original.ravel(), qk=P_observed.ravel())
+    return wasserstein(P_original.ravel(), P_observed.ravel())
 
 
 def jensenshannon_distance(X, Y, **kwargs):
