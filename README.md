@@ -29,3 +29,11 @@ intra-group and inter-group distances:
 
 Note that this only works for pairwise distance metrics such as the
 Wasserstein distance.
+
+## Quality assessment
+
+To perform a rudimentary quality assessment analysis, you need to
+provide a set of embeddings as well as an adjacency matrix to the
+analysis script:
+
+    $ python analyse_results.py ../results/lm/*.tsv  --hue dimension --function link_distributions --adjacency ../results/lm/A.txt
