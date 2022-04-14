@@ -47,7 +47,10 @@ def parse_filename(filename, normalise=True):
 
     # Prepare data for experiments: store name of graphs etc. in there
     experiment = {
-        'name': tokens[0]
+        'name': tokens[0],
+        'length': 0,
+        'n_walks': 0,
+        'context': 0,
     }
 
     # Ignore first and last one; we already know the first one, and we
@@ -205,13 +208,16 @@ def analyse_statistics(args, experiments, n_groups):
 
             stats = stats.squeeze()
 
-            stats_dimensions = []
-            for d, _ in enumerate(stats.T):
-                stats_dimensions.extend([d] * len(stats))
+            if not stats.shape:
+                stats = np.expand_dims(stats, axis=0)
 
             # Assume that we are getting more than one value, such as
             # a total persistence value for each dimension.
             if len(stats.shape) > 1:
+                stats_dimensions = []
+                for d, _ in enumerate(stats.T):
+                    stats_dimensions.extend([d] * len(stats))
+
                 row = {
                     'stats': stats.T.ravel().tolist(),
                     'stats_dimension': stats_dimensions
