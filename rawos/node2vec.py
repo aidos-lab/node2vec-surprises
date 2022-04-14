@@ -49,7 +49,7 @@ class node2vec(pl.LightningModule):
             walks_per_node=args.num_walks,
             num_negative_samples=1,
             p=1,
-            q=1,
+            q=args.q,
             sparse=True
         )
 
@@ -111,6 +111,7 @@ def main(args):
     filename += f'-d{args.dimension}'
     filename += f'-l{args.length}'
     filename += f'-n{args.num_walks}'
+    filename += f'-q{args.q}'
 
     filename += f'-{str(uuid.uuid4().hex)}'
     filename += '.tsv'
@@ -131,6 +132,8 @@ if __name__ == "__main__":
     parser.add_argument('-e', '--epochs', type=int, default=100)
     parser.add_argument('-l', '--length', type=int, default=10)
     parser.add_argument('-n', '--num-walks', type=int, default=10)
+
+    parser.add_argument('-q', type=int, default=1)
 
     parser.add_argument('-N', '--num-runs', type=int, default=10)
 
