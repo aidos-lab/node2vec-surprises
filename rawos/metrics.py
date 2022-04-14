@@ -46,13 +46,16 @@ def link_distributions_kl(X, A=None, **kwargs):
     if A is None:
         return np.inf
 
+    n = A.shape[0]
     P_original = A / (0.5 * np.sum(A))
+    P_original = P_original[np.triu_indices(n, k=1)]
 
     # Create empirical 'observed' link distribution and normalise it
     # afterwards. Some statistical distances require normalised data
     # so this ensures overall validity.
     P_observed = 1 / (1 + np.exp(-pairwise_kernels(X)))
-    P_observed  /= np.sum(P_observed)
+    P_observed = P_observed[np.triu_indices(n, k=1)]
+    P_observed /= np.sum(P_observed)
 
     # Evaluates to the KL divergence between the two empirical link
     # distributions.
