@@ -14,13 +14,13 @@ from scipy.spatial.distance import jensenshannon
 from scipy.stats import entropy
 
 
-def diameter(X, metric='euclidean'):
+def diameter(X, metric='euclidean', **kwargs):
     """Calculate diameter of a point cloud."""
     distances = pairwise_distances(X, metric=metric)
     return np.max(distances)
 
 
-def hausdorff_distance(X, Y, metric='euclidean'):
+def hausdorff_distance(X, Y, metric='euclidean', **kwargs):
     """Calculate Hausdorff distance between point clouds.
 
     Calculates the Hausdorff distance between two finite metric spaces,
@@ -41,11 +41,10 @@ def hausdorff_distance(X, Y, metric='euclidean'):
     return max(d_XY, d_YX)
 
 
-def link_distributions_kl(X):
+def link_distributions_kl(X, A=None, **kwargs):
     """Evaluate Kullback--Leibler divergence of link distributions."""
-    # TODO: Make comparison graph configurable
-    G = nx.generators.les_miserables_graph()
-    A = nx.adjacency_matrix(G, weight=None).toarray()
+    if A is None:
+        return np.inf
 
     P_original = A / A.sum(axis=0)
     P_observed = 1 / (1 + np.exp(-pairwise_kernels(X)))
@@ -55,7 +54,7 @@ def link_distributions_kl(X):
     return entropy(pk=P_original.ravel(), qk=P_observed.ravel())
 
 
-def jensenshannon_distance(X, Y):
+def jensenshannon_distance(X, Y, **kwargs):
     """Computes the Jensen-Shannon distance of two embeddings of the same number of points"""
     
     diamx = diameter(X)
@@ -91,7 +90,7 @@ def jensenshannon_distance(X, Y):
     return  jensenshannon(DistY, DistX, base=None) 
 
 
-def wasserstein_distance(X, Y, metric='euclidean'):
+def wasserstein_distance(X, Y, metric='euclidean', **kwargs):
     """Calculate Wasserstein distance between point clouds.
 
     Calculates the Wasserstein distance between two finite metric
@@ -116,7 +115,7 @@ def get_dimension(diagram, dim=0):
     return diagram
 
 
-def total_persistence(diagram, dim=0, p=2):
+def total_persistence(diagram, dim=0, p=2, **kwargs):
     """Calculate total persistence of a persistence diagram."""
     diagram = get_dimension(diagram, dim)
 
@@ -129,7 +128,7 @@ def total_persistence(diagram, dim=0, p=2):
     return result
 
 
-def total_persistence_point_cloud(X, max_dim=1):
+def total_persistence_point_cloud(X, max_dim=1, **kwargs):
     """Calculate total persistence values of a point cloud."""
     ph = VietorisRipsPersistence(
         metric='euclidean',
@@ -146,12 +145,12 @@ def total_persistence_point_cloud(X, max_dim=1):
     return np.asarray(total_pers)
 
 
-def mean_distance(X):
-    D = pairwise_distances(X, metric='euclidean')
+def mean_distance(X, metric='euclidean', **kwargs):
+    D = pairwise_distances(X, metric=metric)
     return np.mean(D)
 
 
-def persistent_entropy(diagram, dim=0):
+def persistent_entropy(diagram, dim=0, **kwargs):
     """Calculate persistent entropy of a diagram."""
     diagrams = get_dimension(diagram, dim)
 
@@ -171,7 +170,7 @@ def persistent_entropy(diagram, dim=0):
     return np.sum(-probabilities * log_prob)
 
 
-def persistent_entropy_point_cloud(X, max_dim=1):
+def persistent_entropy_point_cloud(X, max_dim=1, **kwargs):
     """Calculate persistent entropy values of a point cloud."""
     ph = VietorisRipsPersistence(
         metric='euclidean',
@@ -188,7 +187,7 @@ def persistent_entropy_point_cloud(X, max_dim=1):
     return np.asarray(entropies)
 
 
-def pairwise_function(X, fn, Y=None, key=None):
+def pairwise_function(X, fn, Y=None, key=None, **kwargs):
     """Pairwise scalar value calculation with an arbitrary function."""
     n = len(X)
     m = len(X) if Y is None else len(Y)
@@ -200,21 +199,21 @@ def pairwise_function(X, fn, Y=None, key=None):
     for i, x in enumerate(X):
         for j, y in enumerate(Y):
             if key is None:
-                D[i, j] = fn(x, y)
+                D[i, j] = fn(x, y, **kwargs)
             else:
-                D[i, j] = fn(x[key], y[key])
+                D[i, j] = fn(x[key], y[key], **kwargs)
 
     return D
 
 
-def summary_statistic_function(X, fn, key=None):
+def summary_statistic_function(X, fn, key=None, **kwargs):
     """Scalar value calculation with an arbitrary function."""
     values = []
 
     for x in X:
         if key is None:
-            values.append(fn(x))
+            values.append(fn(x, **kwargs))
         else:
-            values.append(fn(x[key]))
+            values.append(fn(x[key], **kwargs))
 
     return np.asarray(values)
