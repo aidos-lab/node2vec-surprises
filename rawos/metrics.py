@@ -1,6 +1,5 @@
 """Metrics and pseudo-metrics for comparing point clouds."""
 
-import networkx as nx
 import numpy as np
 
 import ot
@@ -11,7 +10,6 @@ from sklearn.metrics import pairwise_distances
 from sklearn.metrics import pairwise_kernels
 
 from scipy.spatial.distance import jensenshannon
-from scipy.stats import wasserstein_distance as emd
 
 
 def diameter(X, metric='euclidean', **kwargs):
@@ -57,7 +55,19 @@ def link_distributions_emd(X, A=None, **kwargs):
     P_observed = P_observed[np.triu_indices(n, k=1)]
     P_observed /= np.sum(P_observed)
 
-    return emd(P_original.ravel(), P_observed.ravel())
+    n = len(P_original)
+    x = np.arange(n, dtype=float)
+
+    metric = kwargs.get('metric', 'minkowski')
+    M = ot.dist(
+        x.reshape(n, 1),
+        x.reshape(n, 1),
+        metric=metric
+    )
+    M /= M.max()
+
+    dist = ot.emd2(P_original, P_observed, M)
+    return dist 
 
 
 def jensenshannon_distance(X, Y, **kwargs):
