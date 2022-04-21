@@ -76,6 +76,8 @@ def parse_filename(filename, normalise=True):
             experiment['n_walks'] = int(value)
         elif name == 'p':
             experiment['edge_probability'] = float(value.replace('_', '.'))
+        elif name == 'q':
+            experiment['q'] = int(value)
         elif token == 'keep':
             experiment['keep'] = True
 
