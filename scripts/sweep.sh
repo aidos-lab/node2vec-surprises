@@ -16,6 +16,7 @@ for CONTEXT in 5 10; do
                --mem=4G               \
                --nice=10000           \
                --wrap "poetry run python ../rawos/node2vec.py -q $Q --length $LENGTH --dimension $DIMENSION --context $CONTEXT --epochs 200 "
+      done
     done
   done
 done
