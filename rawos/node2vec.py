@@ -137,7 +137,7 @@ def main(args):
 
     id_ = str(uuid.uuid4().hex)
 
-    filename = 'lm'
+    filename = f'{args.graph}'
     filename += f'-c{args.context}'
     filename += f'-d{args.dimension}'
     filename += f'-l{args.length}'
