@@ -13,6 +13,7 @@ import scipy.stats
 from metrics import diameter
 from metrics import hausdorff_distance
 from metrics import jensenshannon_distance
+from metrics import link_auc
 from metrics import link_distributions_emd
 from metrics import mean_distance
 from metrics import persistent_entropy_point_cloud
@@ -31,6 +32,7 @@ import matplotlib.pyplot as plt
 fn_map = {
     'hausdorff': (hausdorff_distance, True),
     'js': (jensenshannon_distance, True),
+    'link_auc': (link_auc, False),
     'link_distributions': (link_distributions_emd, False),
     'mean_distance': (mean_distance, False),
     'persistent_entropy': (persistent_entropy_point_cloud, False),

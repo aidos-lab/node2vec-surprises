@@ -6,6 +6,7 @@ import ot
 
 from gtda.homology import VietorisRipsPersistence
 
+from sklearn.metrics import auc
 from sklearn.metrics import pairwise_distances
 from sklearn.metrics import pairwise_kernels
 
@@ -68,6 +69,46 @@ def link_distributions_emd(X, A=None, **kwargs):
 
     dist = ot.emd2(P_original, P_observed, M)
     return dist 
+
+
+def link_auc(X, A=None, **kwargs):
+    """Evaluate AUC for edge prediction."""
+    if A is None:
+        return np.inf
+
+    n = A.shape[0]
+    K = pairwise_kernels(X)
+
+    thresholds = set(K.ravel())
+
+    tpr = []
+    fpr = []
+    thr = []
+
+    for threshold in sorted(thresholds):
+        E = K <= threshold
+        E = E.astype(np.float)
+
+        # Makes it possible to detect true negatives as well
+        E *= 2.0
+
+        # 2 - 1 ==  1: TP
+        # 2 - 0 ==  2: FP 
+        # 0 - 0 ==  0: TN
+        # 0 - 1 == -1: FN
+        diff = E - A
+
+        tp = (diff == +1.0).sum()
+        fp = (diff == +2.0).sum()
+        tn = (diff == +0.0).sum()
+        fn = (diff == -1.0).sum()
+
+        tpr.append(tp / n**2)
+        fpr.append(fp / n**2)
+        thr.append(threshold)
+
+    fpr, tpr = zip(*sorted(zip(fpr, tpr)))
+    return auc(fpr, tpr) 
 
 
 def jensenshannon_distance(X, Y, **kwargs):
