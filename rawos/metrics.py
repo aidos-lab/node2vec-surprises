@@ -79,18 +79,22 @@ def link_auc(X, A=None, **kwargs):
     n = A.shape[0]
     K = pairwise_kernels(X)
 
-    thresholds = set(K.ravel())
+    # Count edges and non-edges (don't use symmetry or anything else).
+    n_edges = A.sum()
+    n_non_edges = n**2 - n_edges
+
+    thresholds = list(K.ravel())
 
     tpr = []
     fpr = []
     thr = []
 
-    for threshold in sorted(thresholds):
-        E = K <= threshold
-        E = E.astype(np.float)
+    for threshold in np.linspace(np.min(thresholds), np.max(thresholds), 100):
+        E = (K >= threshold)
+        E = E.astype(np.int)
 
         # Makes it possible to detect true negatives as well
-        E *= 2.0
+        E *= 2
 
         # 2 - 1 ==  1: TP
         # 2 - 0 ==  2: FP 
@@ -98,13 +102,13 @@ def link_auc(X, A=None, **kwargs):
         # 0 - 1 == -1: FN
         diff = E - A
 
-        tp = (diff == +1.0).sum()
-        fp = (diff == +2.0).sum()
-        tn = (diff == +0.0).sum()
-        fn = (diff == -1.0).sum()
+        tp = (diff == +1).sum()
+        fp = (diff == +2).sum()
+        tn = (diff == +0).sum()
+        fn = (diff == -1).sum()
 
-        tpr.append(tp / n**2)
-        fpr.append(fp / n**2)
+        tpr.append(tp / n_edges)
+        fpr.append(fp / n_non_edges)
         thr.append(threshold)
 
     fpr, tpr = zip(*sorted(zip(fpr, tpr)))
