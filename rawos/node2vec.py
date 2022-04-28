@@ -57,16 +57,16 @@ class node2vec(pl.LightningModule):
         global edge_index
         global num_nodes
 
+        if args.graph == 'lm':
+            G = les_miserables_graph()
+        elif args.graph == 'sbm2':
+            G = sbm(2)
+        elif args.graph == 'sbm3':
+            G = sbm(3)
+
+        self.A = adjacency_matrix(G, weight=None).toarray()
+
         if edge_index is None:
-            if args.graph == 'lm':
-                G = les_miserables_graph()
-            elif args.graph == 'sbm2':
-                G = sbm(2)
-            elif args.graph == 'sbm3':
-                G = sbm(3)
-
-            self.A = adjacency_matrix(G, weight=None).toarray()
-
             edge_index = from_networkx(G).edge_index
             num_nodes = G.number_of_nodes()
 
