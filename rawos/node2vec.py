@@ -12,10 +12,33 @@ import pytorch_lightning as pl
 from torch_geometric.nn import Node2Vec
 from torch_geometric.utils.convert import from_networkx
 
+from networkx import adjacency_matrix
+from networkx import stochastic_block_model
+
 from networkx.generators import les_miserables_graph
 
 edge_index = None
 num_nodes = 0
+
+
+def sbm(m=2, n=100):
+    """Return SBM graph with ``m`` groups and ``m * n`` nodes."""
+    p = 0.8
+    q = 0.2
+
+    if m == 2:
+        probs = [[p, q], [q, p]]
+        N = [n, n]
+    elif m == 3:
+        probs = [[p, q, q], [q, p, q], [q, q, p]]
+        N = [n, n, n]
+    else:
+        raise RuntimeError('Unexpected number of groups.')
+
+    # Note that the seed is fixed; we want to control for *this* source of
+    # randomness at least.
+    sbm = stochastic_block_model(N, probs, sparse=True, seed=42)
+    return sbm
 
 
 class node2vec(pl.LightningModule):
@@ -35,11 +58,17 @@ class node2vec(pl.LightningModule):
         global num_nodes
 
         if edge_index is None:
-            edge_index = from_networkx(
-                les_miserables_graph()
-            ).edge_index
+            if args.graph == 'lm':
+                G = les_miserables_graph()
+            elif args.graph == 'sbm2':
+                G = sbm(2)
+            elif args.graph == 'sbm3':
+                G = sbm(3)
 
-            num_nodes = les_miserables_graph().number_of_nodes()
+            self.A = adjacency_matrix(G, weight=None).toarray()
+
+            edge_index = from_networkx(G).edge_index
+            num_nodes = G.number_of_nodes()
 
         self.model = Node2Vec(
             edge_index,
@@ -106,6 +135,8 @@ def main(args):
     model.eval()
     z = model.get_embedding()
 
+    id_ = str(uuid.uuid4().hex)
+
     filename = 'lm'
     filename += f'-c{args.context}'
     filename += f'-d{args.dimension}'
@@ -113,7 +144,7 @@ def main(args):
     filename += f'-n{args.num_walks}'
     filename += f'-q{args.q}'
 
-    filename += f'-{str(uuid.uuid4().hex)}'
+    filename += f'-{id_}'
     filename += '.tsv'
 
     np.savetxt(
@@ -122,6 +153,8 @@ def main(args):
         delimiter='\t',
         fmt='%.4f'
     )
+
+    np.savetxt(f'A-{args.graph}.txt', model.A, fmt='%d')
 
 
 if __name__ == "__main__":
@@ -136,6 +169,12 @@ if __name__ == "__main__":
     parser.add_argument('-q', type=int, default=1)
 
     parser.add_argument('-N', '--num-runs', type=int, default=10)
+    parser.add_argument(
+        '-g', '--graph',
+        type=str,
+        default='lm',
+        choices=['lm', 'sbm2', 'sbm3']
+    )
 
     args = parser.parse_args()
 
