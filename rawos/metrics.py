@@ -97,7 +97,7 @@ def link_auc(X, A=None, **kwargs):
         E *= 2
 
         # 2 - 1 ==  1: TP
-        # 2 - 0 ==  2: FP 
+        # 2 - 0 ==  2: FP
         # 0 - 0 ==  0: TN
         # 0 - 1 == -1: FN
         diff = E - A
