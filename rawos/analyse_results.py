@@ -42,13 +42,13 @@ fn_map = {
 
 
 def make_labels(df):
-    """Create labels for captioning a data frame.""" 
+    """Create labels for captioning a data frame."""
     def _row_to_label(row):
         key_map = {
-            'length': 'L',
-            'n_walks': 'N',
-            'context': 'C',
-            'q': 'q',
+            'length': '$L$',
+            'n_walks': '$N$',
+            'context': '$C$',
+            'q': '$q$',
         }
 
         row_dict = dict(row)
