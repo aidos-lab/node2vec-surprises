@@ -41,6 +41,36 @@ fn_map = {
 }
 
 
+def make_labels(df):
+    """Create labels for captioning a data frame.""" 
+    def _row_to_label(row):
+        key_map = {
+            'length': 'L',
+            'n_walks': 'N',
+            'context': 'C',
+            'q': 'q',
+        }
+
+        row_dict = dict(row)
+        var_dict = dict()
+
+        keys = sorted(row_dict.keys())
+
+        for k in keys:
+            if k in key_map:
+                var_dict[key_map[k]] = row_dict.pop(k)
+
+        label = ''
+        for k, v in var_dict.items():
+            label += f'{k} = {v}, '
+
+        label = label[:-2]
+        return row['group'], label
+
+    labels = df.apply(_row_to_label, axis='columns')
+    return labels
+
+
 def parse_filename(filename, normalise=True):
     """Parse filename into experiment description."""
     basename = os.path.basename(filename)
@@ -85,6 +115,9 @@ def parse_filename(filename, normalise=True):
 
     experiment['filename'] = filename
     experiment['data'] = np.loadtxt(filename, delimiter='\t')
+
+    if 'q' not in experiment:
+        experiment['q'] = 1
 
     if normalise:
         diam = diameter(experiment['data'])
@@ -258,12 +291,22 @@ def analyse_statistics(args, experiments, n_groups):
         )
         g.add_legend()
     else:
-        sns.boxplot(
+        g = sns.boxplot(
             data=df,
             x=df['group'], y=attribute,
             hue=args.hue,
             dodge=False
         )
+
+        labels = make_labels(df)
+        labels = sorted(set(labels), key=lambda x: x[0])
+        labels = list(map(lambda x: x[1], labels))
+
+        g.set_xticks(range(len(labels)))
+        g.set_xticklabels(labels)
+
+        plt.xticks(rotation=90)
+        plt.subplots_adjust(bottom=0.5)
 
     # Can only analyse statistical significance if we are dealing with
     # distances.
