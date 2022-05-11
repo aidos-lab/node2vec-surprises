@@ -71,7 +71,7 @@ def link_distributions_emd(X, A=None, **kwargs):
     return dist 
 
 
-def link_auc(X, A=None, **kwargs):
+def link_auc(X, A=None, roc=False, **kwargs):
     """Evaluate AUC for edge prediction."""
     if A is None:
         return np.inf
@@ -87,6 +87,7 @@ def link_auc(X, A=None, **kwargs):
 
     tpr = []
     fpr = []
+    pre = []
     thr = []
 
     for threshold in np.linspace(np.min(thresholds), np.max(thresholds), 100):
@@ -109,10 +110,15 @@ def link_auc(X, A=None, **kwargs):
 
         tpr.append(tp / n_edges)
         fpr.append(fp / n_non_edges)
+        pre.append(tp / (tp + fp))
         thr.append(threshold)
 
-    fpr, tpr = zip(*sorted(zip(fpr, tpr)))
-    return auc(fpr, tpr) 
+    if roc:
+        x, y = zip(*sorted(zip(fpr, tpr)))
+    else:
+        x, y = zip(*sorted(zip(fpr, pre)))
+
+    return auc(x, y)
 
 
 def jensenshannon_distance(X, Y, **kwargs):
