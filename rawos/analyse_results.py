@@ -285,7 +285,11 @@ def analyse_statistics(args, experiments, n_groups):
 
     attribute = 'distances' if 'distances' in df.columns else 'stats'
 
-    plt.figure(figsize=(16, 6))
+    if args.no_labels:
+        plt.figure(figsize=(16, 3))
+    else:
+        plt.figure(figsize=(16, 6))
+
     sns.set_palette('Set2')
 
     if 'stats_dimension' in df.columns:
@@ -320,10 +324,14 @@ def analyse_statistics(args, experiments, n_groups):
         sns.despine()
 
         g.set_xticks(range(len(labels)))
-        g.set_xticklabels(labels)
+
+        if args.no_labels:
+            g.set_xticklabels([""] * len(labels))
+        else:
+            g.set_xticklabels(labels)
+            plt.subplots_adjust(bottom=0.5)
 
         plt.xticks(rotation=90)
-        plt.subplots_adjust(bottom=0.5)
 
     # Can only analyse statistical significance if we are dealing with
     # distances.
@@ -344,6 +352,11 @@ def analyse_statistics(args, experiments, n_groups):
 
         P = 0.5 * (P + P.T)
         P = P < 0.05 / (0.5 * n_groups * (n_groups - 1))
+
+        print(
+            'Percentage of statistically significantly different '
+            'distributions:', 100 * np.sum(P) / (P.shape[0] ** 2)
+        )
 
         plt.figure()
         sns.heatmap(P, vmin=0, vmax=1.0, cmap='RdYlGn')
@@ -380,6 +393,12 @@ if __name__ == '__main__':
         type=str,
         help='If set, loads adjacency matrix from specified path. This will '
               'be required for link distribution analysis.'
+    )
+
+    parser.add_argument(
+        '-n', '--no-labels',
+        action='store_true',
+        help='If set, suppresses label output'
     )
 
     args = parser.parse_args()
