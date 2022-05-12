@@ -68,7 +68,7 @@ def link_distributions_emd(X, A=None, **kwargs):
     M /= M.max()
 
     dist = ot.emd2(P_original, P_observed, M)
-    return dist 
+    return dist
 
 
 def link_auc(X, A=None, roc=False, **kwargs):
@@ -82,6 +82,8 @@ def link_auc(X, A=None, roc=False, **kwargs):
     # Count edges and non-edges (don't use symmetry or anything else).
     n_edges = A.sum()
     n_non_edges = n**2 - n_edges
+
+    print(f'Class balance for link prediction: {n_edges / n**2:.2f}')
 
     thresholds = list(K.ravel())
 
