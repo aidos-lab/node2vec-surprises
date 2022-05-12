@@ -41,6 +41,15 @@ fn_map = {
 }
 
 
+# Maps a function name to a nice label that will be used for plotting.
+label_map = {
+    'hausdorff': 'Hausdorff distance',
+    'link_auc': 'Link reconstruction (AUPRC)',
+    'link_distributions': 'Link distribution ($W_q$)',
+    'wasserstein': 'Wasserstein distance',
+}
+
+
 def make_labels(df):
     """Create labels for captioning a data frame."""
     def _row_to_label(row):
@@ -276,6 +285,9 @@ def analyse_statistics(args, experiments, n_groups):
 
     attribute = 'distances' if 'distances' in df.columns else 'stats'
 
+    plt.figure(figsize=(16, 6))
+    sns.set_palette('Set2')
+
     if 'stats_dimension' in df.columns:
         g = sns.FacetGrid(
             data=df,
@@ -301,6 +313,11 @@ def analyse_statistics(args, experiments, n_groups):
         labels = make_labels(df)
         labels = sorted(set(labels), key=lambda x: x[0])
         labels = list(map(lambda x: x[1], labels))
+
+        if args.function in label_map:
+            plt.ylabel(label_map[args.function])
+
+        sns.despine()
 
         g.set_xticks(range(len(labels)))
         g.set_xticklabels(labels)
