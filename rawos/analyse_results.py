@@ -333,6 +333,9 @@ def analyse_statistics(args, experiments, n_groups):
 
         plt.xticks(rotation=90)
 
+    if args.output is not None:
+        plt.savefig(args.output)
+
     # Can only analyse statistical significance if we are dealing with
     # distances.
     if attribute == 'distances':
@@ -362,7 +365,9 @@ def analyse_statistics(args, experiments, n_groups):
         sns.heatmap(P, vmin=0, vmax=1.0, cmap='RdYlGn')
 
     plt.tight_layout()
-    plt.show()
+
+    if args.output is None:
+        plt.show()
 
 
 if __name__ == '__main__':
@@ -399,6 +404,13 @@ if __name__ == '__main__':
         '-n', '--no-labels',
         action='store_true',
         help='If set, suppresses label output'
+    )
+
+    parser.add_argument(
+        '-o', '--output',
+        default=None,
+        type=str,
+        help='If set, stores plots in specified filename.'
     )
 
     args = parser.parse_args()
