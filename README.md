@@ -1,5 +1,7 @@
 # On the Surprising Behaviour of `node2vec`
 
+![GitHub](https://img.shields.io/github/license/aidos-lab/node2vec-surprises)
+
 ## Installation
 
 We suggest using [`poetry`](https://python-poetry.org) to install the
