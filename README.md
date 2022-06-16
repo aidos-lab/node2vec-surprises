@@ -1,12 +1,25 @@
-# RAWOS: Random Walks On Structures
+# On the Surprising Behaviour of `node2vec`
+
+## Installation
+
+We suggest using [`poetry`](https://python-poetry.org) to install the
+code:
+
+```bash
+$ poetry install
+```
+
+We have tested this repository with Python 3.9 and Python 3.8.1.
+
+## Examples
+
+### Creating some embeddings
 
 Running the code (example):
 
     # Let's run for 50 epochs, generate 16-dimensional embeddings,
     # and keep everything at default parameters.
     $ python node2vec.py -d 16 -e 50
-
-## Examples
 
 ### Creating a gallery of embeddings
 
