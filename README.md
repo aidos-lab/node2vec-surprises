@@ -1,6 +1,6 @@
 # On the Surprising Behaviour of `node2vec`
 
-![GitHub](https://img.shields.io/github/license/aidos-lab/node2vec-surprises)
+![GitHub contributors](https://img.shields.io/github/contributors/aidos-lab/node2vec-surprises) ![GitHub](https://img.shields.io/github/license/aidos-lab/node2vec-surprises)
 
 ## Installation
 
