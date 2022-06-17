@@ -2,6 +2,22 @@
 
 ![GitHub contributors](https://img.shields.io/github/contributors/aidos-lab/node2vec-surprises) ![GitHub](https://img.shields.io/github/license/aidos-lab/node2vec-surprises)
 
+This is the code to our paper on the [ICML 2022 Workshop on Topology,
+Algebra, and Geometry in Machine Learning]:
+
+```biblatex
+@unpublished{Hacker22a,
+  title         = {On the Surprising Behaviour of \texttt{node2vec}},
+  author        = {Celia Hacker and Bastian Rieck},
+  year          = {2022},
+  eprint        = {2206.08252},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.LG},
+  type          = {Preprint},
+  repository    = {https://github.com/aidos-lab/node2vec-surprises},
+}
+```
+
 ## Installation
 
 We suggest using [`poetry`](https://python-poetry.org) to install the
