@@ -5,7 +5,7 @@
 This is the code to our paper on the [ICML 2022 Workshop on Topology,
 Algebra, and Geometry in Machine Learning]:
 
-```biblatex
+```bibtex
 @unpublished{Hacker22a,
   title         = {On the Surprising Behaviour of \texttt{node2vec}},
   author        = {Celia Hacker and Bastian Rieck},
